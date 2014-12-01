@@ -1,0 +1,13 @@
+
+
+
+    <record id="action_sale_order_make_invoice" model="ir.actions.act_window">
+	<field name="name">Make Invoices</field>
+	<field name="type">ir.actions.act_window</field>
+	<field name="res_model">sale.make.invoice</field>
+	<field name="view_type">form</field>
+	<field name="view_mode">form</field>
+	<field name="view_id" ref="view_sale_order_make_invoice"/>
+	<field name="target">new</field>
+	<field name="multi">True</field>
+    </record>

@@ -1,0 +1,65 @@
+<openerp>
+    <data>
+        <menuitem name="Mage2Odoo"
+        id="menu_mage_core"
+        sequence="60"/>
+
+        <menuitem name="Configuration"
+        id="menu_mage_configuration"
+        parent="menu_mage_core"
+        sequence="100"/>
+
+
+        <record id="view_mage_setup_tree" model="ir.ui.view">
+            <field name="name">Mage Setup Tree</field>
+            <field name="model">mage.setup</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" />
+		    <field name="url" />
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="view_mage_setup_form" model="ir.ui.view">
+            <field name="name">Mage Setup Form</field>
+            <field name="model">mage.setup</field>
+            <field name="arch" type="xml">
+		<form>
+		    <sheet>
+		        <h1>
+                            <field name="name" />
+		        </h1>
+		        <group colspan="4">
+                            <field name="url" />
+		        </group>
+		        <group>
+			    <field name="username"/>
+			    <field name="password" password="1" />
+		        </group>
+			<group>
+			    <field name="picking_policy" />
+			    <field name="invoice_policy" />
+			</group>
+                    </sheet>
+		</form>
+            </field>
+        </record>
+
+
+        <record id="action_mage_setup" model="ir.actions.act_window">
+            <field name="name">Magento Setup</field>
+            <field name="res_model">mage.setup</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="view_mage_setup_tree"/>
+        </record>
+
+        <menuitem action="action_mage_setup"
+        id="menu_mage_setup"
+	parent="menu_mage_configuration"
+        sequence="50"/>
+
+   </data>
+</openerp>

@@ -1,0 +1,162 @@
+<openerp>
+    <data>
+
+	<record id="view_mage_sale_order_search" model="ir.ui.view">
+	    <field name="name">Mage Sale Order Search</field>
+	    <field name="model">sale.order</field>
+	    <field name="inherit_id" ref="sale.view_sales_order_filter" />
+	    <field name="arch" type="xml">
+		<field name="name" position="after">
+                    <field name="order_email" />
+                    <field name="mage_store" />
+		</field>
+	    </field>
+	</record>
+
+	<record id="view_mage_sale_order_tree" model="ir.ui.view">
+	    <field name="name">Mage Sale Order Tree</field>
+	    <field name="model">sale.order</field>
+	    <field name="inherit_id" ref="sale.view_order_tree" />
+	    <field name="arch" type="xml">
+		<field name="partner_id" position="after" >
+		    <field name="order_email" />
+		    <field name="mage_store" />
+		</field>
+	    </field>
+	</record>
+
+	<record id="view_mage_quote_tree" model="ir.ui.view">
+	    <field name="name">Mage Sale Quote Tree</field>
+	    <field name="model">sale.order</field>
+	    <field name="inherit_id" ref="sale.view_quotation_tree" />
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after" >
+                    <field name="order_email" />
+                    <field name="mage_store" />
+                </field>
+            </field>
+        </record>
+
+	<record id="view_mage_order_form" model="ir.ui.view">
+	    <field name="name">Mage Sale Order Form</field>
+	    <field name="model">sale.order</field>
+	    <field name="inherit_id" ref="sale.view_order_form" />
+	    <field name="arch" type="xml">
+		<field name="date_order" position="after" >
+		    <field name="order_email" />
+		</field>
+	    </field>
+	</record>
+
+        <record id="view_mage_shipping_form" model="ir.ui.view">
+            <field name="name">Mage Sale Order Shipping Form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="payment_method.view_sale_billing_form" />
+            <field name="arch" type="xml">
+		<group name="payment" position="inside">
+		    <field name="mage_invoice_complete" />
+		</group>
+                <page string="Billing" position="after" >
+                    <page string="Shipping" >
+			<group>
+			    <group name="carrier" string="Delivery">
+			    </group>
+			    <group name="shipping" string="General">
+			        <field name="mage_shipment_complete" />
+			    </group>
+			</group>
+                        <group string="Delivery Orders" name="pickings">
+                            <field name="picking_ids" nolabel="1" widget="one2many_list">
+				<tree>
+				    <field name="name" />
+				    <field name="carrier_id" string="Ship Via" />
+				    <field name="state" />
+				</tree>
+                            </field>
+                        </group>
+                    </page>
+                </page>
+	    </field>
+	</record>
+
+
+        <record id="delivery.view_order_withcarrier_form" model="ir.ui.view">
+            <field name="name">delivery.sale.order_withcarrier.form.view</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="view_mage_shipping_form"/>
+            <field name="arch" type="xml">
+		<group name="carrier" position="inside">
+                        <label for="carrier_id"/>
+                        <div>
+                            <field name="carrier_id" context="{'order_id':active_id or False}" class="oe_inline"/>
+                            <button name="delivery_set" string="Add in Quote" type="object"
+                                class="oe_edit_only"
+                                attrs="{'invisible':['|',('carrier_id','=',False),('state','not in',('draft','sent'))]}"/>
+                            <br/>
+                            <label string="If you don't 'Add in Quote', the exact price will be computed when invoicing based on delivery order(s)."
+                                class="oe_edit_only"
+                                attrs="{'invisible':['|',('carrier_id','=',False),('state','not in',('draft','sent'))]}"/>
+                        </div>
+                </group>
+            </field>
+        </record>
+
+	<record id="view_mage_sale_stock_form" model="ir.ui.view">
+	    <field name="name">Mage Sale Stock Order Form</field>
+	    <field name="model">sale.order</field>
+	    <field name="inherit_id" ref="sale_stock.view_order_form_inherit"/>
+	    <field name="arch" type="xml">
+                <field name="warehouse_id" position="after">
+                    <field name="mage_store" />
+                </field>
+	    </field>
+	</record>
+
+	<record id="sale.action_quotations" model="ir.actions.act_window">
+	    <field name="name">Quotations</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="res_model">sale.order</field>
+	    <field name="view_type">form</field>
+	    <field name="context">{}</field>
+	    <field name="view_id" ref="sale.view_quotation_tree"/>
+	    <field name="view_mode">tree,form,calendar,graph</field>
+	    <field name="domain">[('state','in',('draft','sent','cancel'))]</field>
+	    <field name="search_view_id" ref="sale.view_sales_order_filter"/>
+	    <field name="help" type="html">
+	      <p class="oe_view_nocontent_create">
+	      Click to create a quotation, the first step of a new sale.
+	      </p><p>
+	      Odoo will help you handle efficiently the complete sale flow:
+	      from the quotation to the sales order, the
+	      delivery, the invoicing and the payment collection.
+	      </p><p>
+	      The social feature helps you organize discussions on each sales
+	      order, and allow your customers to keep track of the evolution
+	      of the sales order.
+	      </p>
+	    </field>
+	</record>
+
+	<record id="sale.action_orders" model="ir.actions.act_window">
+	    <field name="name">Sales Orders</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="res_model">sale.order</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree,form,calendar,graph</field>
+	    <field name="search_view_id" ref="sale.view_sales_order_filter"/>
+	    <field name="context">{}</field>
+	    <field name="domain">[('state', 'not in', ('draft', 'sent', 'cancel'))]</field>
+	    <field name="help" type="html">
+	      <p class="oe_view_nocontent_create">
+	      Click to create a quotation that can be converted into a sales
+	      order.
+	      </p><p>
+	      Odoo will help you efficiently handle the complete sales flow:
+	      quotation, sales order, delivery, invoicing and payment.
+	      </p>
+	    </field>
+	</record>
+
+    </data>
+</openerp>
+

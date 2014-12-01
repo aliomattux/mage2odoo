@@ -1,0 +1,68 @@
+<openerp>
+    <data>
+
+        <menuitem name="Import/Export"
+        id="menu_mage_import_export"
+        parent="menu_mage_core"
+        sequence="50"/>
+
+	<record model="ir.ui.view" id="view_mage_import_form">
+	    <field name="name">Import Products Wizard</field>
+	    <field name="model">mage.import.wizard</field>
+	    <field name="arch" type="xml">
+		<form>
+		    <group string="Upload File" >
+		        <field name="file" required="1"/>
+		    </group>
+                    <button name="import_products" string="Go"
+                    type="object"/>
+		</form>
+	    </field>
+	</record>
+
+        <record id="action_mage_import_products" model="ir.actions.act_window">
+            <field name="name">Import Products</field>
+            <field name="res_model">mage.import.wizard</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+	    <field name="view_mode">form</field>
+	    <field name="target">new</field>
+            <field name="view_id" ref="view_mage_import_form"/>
+        </record>
+
+        <record model="ir.ui.view" id="view_mage_export_form">
+            <field name="name">Export Products Wizard</field>
+            <field name="model">mage.export.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group string="Select Export" >
+                    </group>
+                    <button name="export_products" string="Go"
+                    type="object"/>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_mage_export_products" model="ir.actions.act_window">
+            <field name="name">Export Products</field>
+            <field name="res_model">mage.export.wizard</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+	    <field name="view_mode">form</field>
+	    <field name="target">new</field>
+            <field name="view_id" ref="view_mage_export_form"/>
+        </record>
+
+	<menuitem id="menu_import_products"
+	action="action_mage_import_products"
+	parent="menu_mage_import_export"
+	sequence="10"/>
+
+	<menuitem id="menu_export_products"
+	action="action_mage_export_products"
+	parent="menu_mage_import_export"
+	sequence="20"/>
+
+
+    </data>
+</openerp>

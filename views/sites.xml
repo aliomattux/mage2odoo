@@ -1,0 +1,185 @@
+<openerp>
+    <data>
+
+        <menuitem name="Sites"
+        id="menu_mage_site_management"
+        parent="menu_mage_core"
+        sequence="30"/>
+
+
+        <record id="view_mage_website_tree" model="ir.ui.view">
+            <field name="name">Mage Website Tree</field>
+            <field name="model">mage.website</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" />
+		    <field name="code" />
+		    <field name="sort_order" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_mage_website_form" model="ir.ui.view">
+            <field name="name">Mage Website Form</field>
+            <field name="model">mage.website</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <h1>
+                            <field name="name" class="oe_inline" readonly="1"/>
+                        </h1>
+			<group string="Identity" readonly="1">
+			    <field name="code" readonly="1"/>
+			    <field name="is_default" readonly="1"/>
+			    <field name="default_store_group" readonly="1"/>
+			    <field name="sort_order" readonly="1"/>
+			    <field name="external_id" readonly="1"/>
+			</group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="view_mage_store_group_tree" model="ir.ui.view">
+            <field name="name">Mage Store Group Tree</field>
+            <field name="model">mage.store.group</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" />
+		    <field name="website" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_mage_store_group_form" model="ir.ui.view">
+            <field name="name">Mage Store Group Form</field>
+            <field name="model">mage.store.group</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <h1>
+                            <field name="name" class="oe_inline" readonly="1"/>
+                        </h1>
+			<group string="Identity" readonly="1">
+			    <field name="website" readonly="1"/>
+			    <field name="external_id" readonly="1"/>
+			    <field name="default_store_view" readonly="1"/>
+			</group>
+                        <separator string="Storeviews" colspan="4" />
+                        <field name="store_views" widget="one2many_list" nolabel="1" readonly="1">
+                            <tree>
+                                <field name="name" />
+				<field name="code" />
+                            </tree>
+                        </field>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="view_mage_store_view_tree" model="ir.ui.view">
+            <field name="name">Mage Store View Tree</field>
+            <field name="model">mage.store.view</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" />
+		    <field name="store" />
+		    <field name="code" />
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="view_mage_store_view_form" model="ir.ui.view">
+            <field name="name">Mage Store View Form</field>
+            <field name="model">mage.store.view</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <h1>
+                            <field name="name" class="oe_inline" readonly="1"/>
+                        </h1>
+			<group string="Identity" readonly="1">
+			    <field name="store" readonly="1"/>
+			    <field name="code" readonly="1"/>
+			    <field name="sort_order" readonly="1"/>
+			    <field name="website" readonly="1"/>
+			</group>
+			<group string="Settings" >
+			    <field name="order_prefix" />
+			    <field name="warehouse" required="1" />
+			    <field name="picking_policy" />
+			    <field name="invoice_policy" />
+			    <field name="do_not_import" />
+			</group>
+			<group string="Schedule" >
+			    <field name="import_orders_start_datetime" />
+			    <field name="last_import_datetime" />
+			    <field name="last_export_datetime" />
+			</group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="action_mage_website" model="ir.actions.act_window">
+            <field name="name">Website</field>
+            <field name="res_model">mage.website</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="view_mage_website_tree"/>
+            <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+            No Websites Synced.
+            </p>
+            </field>
+        </record>
+
+        <record id="action_mage_store_group" model="ir.actions.act_window">
+            <field name="name">Stores</field>
+            <field name="res_model">mage.store.group</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="view_mage_store_group_tree"/>
+            <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+            No Stores Synced.
+            </p>
+            </field>
+        </record>
+
+        <record id="action_mage_store_view" model="ir.actions.act_window">
+            <field name="name">Store Views</field>
+            <field name="res_model">mage.store.view</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="view_mage_store_view_tree"/>
+            <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+            No Storeviews Synced.
+            </p>
+            </field>
+        </record>
+
+
+        <menuitem action="action_mage_website"
+        id="menu_mage_website"
+	parent="menu_mage_site_management"
+        sequence="10"/>
+
+        <menuitem action="action_mage_store_group"
+        id="menu_mage_store_group"
+        parent="menu_mage_site_management"
+        sequence="20"/>
+
+        <menuitem action="action_mage_store_view"
+        id="menu_mage_store_view"
+	parent="menu_mage_site_management"
+        sequence="30"/>
+
+
+    </data>
+</openerp>

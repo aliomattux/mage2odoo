@@ -1,0 +1,30 @@
+{
+    'name': 'Mage2Odoo',
+    'version': '1.1',
+    'author': 'Kyle Waid',
+    'category': 'Sales Management',
+    'depends': ['mage_look_and_feel', 'payment_method', 'delivery'],
+    'website': 'https://www.gcotech.com',
+    'description': """ 
+    """,
+    'data': ['views/core.xml',
+	     'views/attribute.xml',
+	     'views/sites.xml',
+	     'views/mapping.xml',
+	     'views/jobs.xml',
+	     'views/product.xml',
+	     'views/import_export.xml',
+	     'views/product_category.xml',
+	     'views/model.xml',
+	     'views/misc.xml',
+	     'views/sale.xml',
+	     'views/stock.xml',
+    ],
+    'test': [
+    ],
+    'installable': True,
+    'auto_install': False,
+    'external_dependencies': {
+	'python': ['magento', 'pycountry'],
+    },
+}

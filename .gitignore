@@ -1,0 +1,4 @@
+*.pyc
+*.save
+*.tmp
+*.DS_Store

@@ -1,0 +1,21 @@
+<openerp>
+    <data>
+
+	<record id="view_mage_picking_form" model="ir.ui.view">
+	    <field name="name">Mage Stock Picking Form</field>
+	    <field name="model">stock.picking</field>
+	    <field name="inherit_id" ref="stock.view_picking_form" />
+	    <field name="arch" type="xml">
+		<field name="origin" position="replace" >
+		    <field name="origin" attrs="{'invisible': [('sale', '!=', False)]}" />
+		</field>
+		<field name="backorder_id" position="after" >
+		    <field name="sale" attrs="{'invisible': [('sale', '=', False)]}" />
+		    <field name="purchase" attrs="{'invisible': [('purchase', '=', False)]}" />
+		    <field name="mage_store" attrs="{'invisible': [('mage_store', '=', False)]}"/>
+		</field>
+	    </field>
+	</record>
+
+    </data>
+</openerp>

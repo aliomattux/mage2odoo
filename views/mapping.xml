@@ -1,0 +1,111 @@
+<openerp>
+    <data>
+
+        <record id="view_mage_mapping_tree" model="ir.ui.view">
+            <field name="name">Mage Mapping Tree</field>
+            <field name="model">mage.mapping</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" />
+		    <field name="model_id" />
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="mage_mapping_form" model="ir.ui.view">
+            <field name="name">Mage Mapping Form</field>
+            <field name="model">mage.mapping</field>
+            <field name="arch" type="xml">
+		<form string="Object Mappings">
+		    <group colspan="4">
+		        <field name="name" />
+		        <field name="model_id" />
+			<field name="magento_id_fieldname" />
+		        <field name="related_model_ids" invisible="1" />
+		    </group>
+		    <newline/>
+		    <separator string="Mapping Lines" colspan="4" col="8" />
+		    <field colspan="4" name="mapping_lines" widget="one2many_list" context="{'model_id':model_id}" nolabel="1">
+		        <tree>
+			    <field name="mage_fieldname" />
+			    <field name="external_type" />
+			    <field name="field" />
+			    <field name="internal_type" />
+			    <field name="mapping_type" />
+			    <field name="type" />
+			</tree>
+			<form string="Mapping Lines">
+			    <field name="mapping" invisible="1"/>
+			    <group colspan="2">
+				<field name="mage_fieldname" />
+				<field name="datetime_format" attrs="{'invisible':[('external_type','!=','datetime')]}"/>
+                		<field name="external_type" />
+			    </group>
+			    <group colspan="2">
+                                <field name="field" domain="[('model_id','in',parent.related_model_ids[0][2])]"
+                                                attrs="{'required':[('mapping_type','in',['direct', 'sub-mapping'])],
+                                                'invisible':[('mapping_type', '=', 'function')]}"/>
+                            	<field name="child_mapping" colspan="2"
+                                    		attrs="{'invisible':[('mapping_type','!=','sub-mapping')],
+                                                'required':[('mapping_type','=','sub-mapping')]}"/>
+				<field name="internal_type" readonly="1" />
+			    <field name="relation" invisible="1" />
+			    </group>
+			    <group name="type_fields" >
+                		<field name="mapping_type" />
+				<field name="function_name" attrs="{'invisible': 
+				[('mapping_type', '!=', 'function')],
+				'required': [('mapping_type', '=', 'function')]}" />
+				<field name="type" />
+			    </group>
+			</form>
+		    </field>
+		</form>
+            </field>
+        </record>
+
+
+        <record id="view_mage_mapping_line_tree" model="ir.ui.view">
+            <field name="name">Mage Mapping Line Tree</field>
+            <field name="model">mage.mapping.line</field>
+            <field name="arch" type="xml">
+                <tree>
+		    <field name="mapping" />
+		    <field name="mage_fieldname" />
+		    <field name="external_type" />
+		    <field name="field" />
+		    <field name="internal_type" />
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="action_mage_mapping" model="ir.actions.act_window">
+            <field name="name">Object Mappings</field>
+            <field name="res_model">mage.mapping</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="view_mage_mapping_tree"/>
+        </record>
+
+        <record id="action_mage_mapping_line" model="ir.actions.act_window">
+            <field name="name">Object Line Mappings</field>
+            <field name="res_model">mage.mapping.line</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="view_mage_mapping_line_tree"/>
+        </record>
+
+        <menuitem action="action_mage_mapping"
+        id="menu_mage_mapping"
+	parent="menu_mage_configuration"
+        sequence="20"/>
+
+        <menuitem action="action_mage_mapping_line"
+        id="menu_mage_mapping_line"
+        parent="menu_mage_configuration"
+        sequence="30"/>
+
+   </data>
+</openerp>

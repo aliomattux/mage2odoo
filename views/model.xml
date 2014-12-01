@@ -1,0 +1,31 @@
+<openerp>
+    <data>
+
+        <record id="view_mage_model_tree" model="ir.ui.view">
+            <field name="name">Mage Model Tree</field>
+            <field name="model">ir.model</field>
+            <field name="arch" type="xml">
+                <tree editable="top">
+                    <field name="name" readonly="1"/>
+                    <field name="mage_create_mapping" />
+		    <field name="mage_info_method" />
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="action_mage_model" model="ir.actions.act_window">
+            <field name="name">Model Mapping</field>
+            <field name="res_model">ir.model</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="view_mage_model_tree"/>
+        </record>
+
+        <menuitem action="action_mage_model"
+        id="menu_mage_model"
+        parent="menu_mage_configuration"
+        sequence="40"/>
+
+   </data>
+</openerp>

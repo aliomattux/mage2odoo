@@ -1,0 +1,224 @@
+<openerp>
+    <data>
+
+        <menuitem name="Attribute Management"
+	id="menu_mage_attribute_management"
+        parent="menu_mage_core"
+        sequence="10"/>
+
+
+	<record id="view_mage_attribute_set_tree" model="ir.ui.view">
+	    <field name="name">Mage Attribute Set Tree</field>
+	    <field name="model">product.attribute.set</field>
+	    <field name="arch" type="xml">
+	        <tree>
+                    <field name="name" />
+	        </tree>
+	    </field>
+	</record>
+
+
+        <record id="view_mage_attribute_set_form" model="ir.ui.view">
+            <field name="name">Mage Attribute Set Form</field>
+            <field name="model">product.attribute.set</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <h1>
+                            <field name="name" class="oe_inline" />
+                        </h1>
+			<separator string="Groups" colspan="4" />
+		        <field name="groups" widget="one2many_list" nolabel="1">
+			    <tree>
+				<field name="name" />
+			    </tree>
+			</field>
+		    </sheet>
+		</form>
+            </field>
+        </record>
+
+
+        <record id="view_mage_attribute_group_tree" model="ir.ui.view">
+            <field name="name">Mage Attribute Group Tree</field>
+            <field name="model">product.attribute.group</field>
+            <field name="arch" type="xml">
+                <tree>
+		    <field name="name" />
+		    <field name="set" />
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="view_mage_attribute_group_form" model="ir.ui.view">
+            <field name="name">Mage Attribute Group Form</field>
+            <field name="model">product.attribute.group</field>
+            <field name="arch" type="xml">
+                <form>
+                    <field name="name" />
+                    <field name="set" />
+		    <separator string="Attributes" colspan="4" />
+		    <field name="attributes" widget="one2many_list" nolabel="1">
+			<tree>
+			    <field name="name" />
+			</tree>
+		    </field>
+                </form>
+	    </field>
+	</record>
+	
+
+
+        <record id="view_mage_attribute_tree" model="ir.ui.view">
+            <field name="name">Mage Attribute Tree</field>
+            <field name="model">product.attribute</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="attribute_code" />
+                    <field name="name" />
+                    <field name="is_required" string="Required"/>
+                    <field name="is_user_defined" string="System"/>
+		    <field name="scope" />
+		    <field name="is_filterable" />
+		    <field name="is_comparable" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_mage_attribute_form" model="ir.ui.view">
+            <field name="name">Mage Attribute Form</field>
+            <field name="model">product.attribute</field>
+            <field name="arch" type="xml">
+                <form>
+		    <sheet>
+			<h1>
+			    <field name="name" class="oe_inline" />
+			</h1>
+			<notebook>
+			    <page string="Properties" >
+		                <separator string="Attribute Properties" colspan="4"/>
+				<group>
+				    <field name="attribute_code" />
+				    <field name="scope" />
+				    <field name="frontend_input" />
+				    <field name="is_unique" />
+				    <field name="is_required" />
+				    <field name="apply_to" />
+<!--				    <field name="apply_to_selections" attrs="{'invisible':
+				    [('apply_to', '!=', 'select_types')]}"
+				    widget="many2many_tags" /> -->
+				</group>
+		                <separator string="Frontend Properties" colspan="4"/>
+				<group>
+				    <field name="is_searchable" />
+				    <field name="is_visible_in_advanced_search" />
+				    <field name="is_comparable" />
+				    <field name="is_filterable" />
+				    <field name="is_filterable_in_search" />
+				    <field name="is_used_for_promo_rules" />
+				    <field name="position" />
+				    <field name="is_html_allowed_on_front" />
+				    <field name="is_visible_on_front" />
+				    <field name="used_in_product_listing" />
+				    <field name="used_for_sort_by" />
+				</group>
+			    </page>
+			    <page string="Values" >
+			        <separator string="Manage Options" colspan="4" />
+				<field name="value_ids" widget="one2many_list" colspan="4" nolabel="1" />
+			    </page>
+			</notebook>
+		    </sheet>
+		</form>
+	    </field>
+	</record>
+<!--
+
+        <record id="view_mage_attribute_value_tree" model="ir.ui.view">
+            <field name="name">Mage Attribute Value Tree</field>
+            <field name="model">product.attribute.value</field>
+            <field name="arch" type="xml">
+                <tree>
+		    <field name="label" />
+                    <field name="name" />
+                </tree>
+            </field>
+        </record>
+-->
+
+
+	<record id="action_mage_attribute_set" model="ir.actions.act_window">
+	    <field name="name">Attribute Sets</field>
+	    <field name="res_model">product.attribute.set</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="view_type">form</field>
+	    <field name="view_id" ref="view_mage_attribute_set_tree"/>
+	    <field name="help" type="html">
+	    <p class="oe_view_nocontent_create">
+	    Click to Create an Attribute Set.
+	    </p>
+	    </field>
+	</record>
+
+        <record id="action_mage_attribute_group" model="ir.actions.act_window">
+            <field name="name">Attribute Groups</field>
+            <field name="res_model">product.attribute.group</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="view_mage_attribute_group_tree"/>
+            <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+            Click to Create an Attribute Group.
+            </p>
+            </field>
+        </record>
+
+        <record id="action_mage_attribute" model="ir.actions.act_window">
+            <field name="name">Attributes</field>
+            <field name="res_model">product.attribute</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="view_mage_attribute_tree"/>
+            <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+            Click to Create an Attribute.
+            </p>
+            </field>
+        </record>
+<!--
+        <record id="action_mage_attribute_value" model="ir.actions.act_window">
+            <field name="name">Attribute Values</field>
+            <field name="res_model">product.attribute.value</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="view_mage_attribute_value_tree"/>
+            <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+            Click to Create an Attribute Value.
+            </p>
+            </field>
+        </record>
+-->
+        <menuitem action="action_mage_attribute_set"
+        id="menu_mage_attribute_set"
+        parent="menu_mage_attribute_management"
+        sequence="10"/>
+
+        <menuitem action="action_mage_attribute_group"
+        id="menu_mage_attribute_group"
+        parent="menu_mage_attribute_management"
+        sequence="20"/>
+
+        <menuitem action="action_mage_attribute"
+        id="menu_mage_attribute"
+        parent="menu_mage_attribute_management"
+        sequence="30"/>
+<!--
+        <menuitem action="action_mage_attribute_value"
+        id="menu_mage_attribute_value"
+        parent="menu_mage_attribute_management"
+        sequence="40"/>
+-->
+    </data>
+</openerp>

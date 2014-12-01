@@ -1,0 +1,114 @@
+<openerp>
+    <data>
+        <record id="view_mage_product_template_search" model="ir.ui.view">
+            <field name="name">Mage Product Template Search</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_search_view" />
+            <field name="arch" type="xml">
+		<field name="name" position="before" >
+		    <field name="default_code" string="SKU"/>
+		</field>
+	    </field>
+	</record>
+
+	<record id="product_template_configurable_action" model="ir.actions.act_window">
+	    <field name="name">Configurable Products</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="res_model">product.template</field>
+	    <field name="view_mode">tree,form,kanban</field>
+	    <field name="view_type">form</field>
+	    <field name="view_id" ref="product.product_template_tree_view"/>
+	    <field name="domain">[('mage_type', '=', 'configurable')]</field>
+	    <field name="help" type="html">
+		<p class="oe_view_nocontent_create">
+		  No configurable products. Click to create.
+		</p>
+	    </field>
+	</record>
+
+	<menuitem action="product.product_template_action" id="stock.menu_stock_products_menu" parent="stock.menu_stock_product" sequence="2"/>
+
+	<menuitem action="product_template_configurable_action"
+		id="menu_product_template_configurable_action"
+		parent="stock.menu_stock_product" sequence="1" />
+
+        <record id="view_mage_product_template_tree" model="ir.ui.view">
+            <field name="name">Mage Product Template Tree</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_tree_view" />
+            <field name="arch" type="xml">
+                <field name="type" position="after">
+                    <field name="mage_type" />
+                    <field name="mage_status" />
+                </field>
+            </field>
+        </record>
+
+        <record id="view_mage_product_template_form" model="ir.ui.view">
+            <field name="name">Mage Product Template Form</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_form_view"/>
+            <field name="arch" type="xml">
+		<div name="options" position="inside" >
+		    <field name="sync_to_mage" />
+		    <label for="sync_to_mage"/>
+		</div>
+		<!-- In America we do not use EAN codes -->
+<!--		<field name="ean13" position="replace" >
+		    <field name="upc" />
+		</field>-->
+		<field name="description" position="replace" >
+		<separator string="Short/Detailed Description" colspan="4" />
+		<field name="short_description" nolabel="1" colspan="4"/>
+		<newline/>
+		<field name="description" colspan="4" nolabel="1" />
+		</field>
+            </field>
+        </record>
+
+	<record id="mage_core_configurable_menu" model="ir.ui.view">
+	    <field name="name">Mage Core Configurable Menu</field>
+	    <field name="model">product.template</field>
+	    <field name="inherit_id" ref="product.product_template_only_form_view"/>
+	    <field name="arch" type="xml">
+                <xpath expr="//page[@string='Variants']" position="replace">
+                    <page string="Associated Products" attrs="{'invisible': 
+			['|', ('mage_type', '!=', 'configurable'), ('sync_to_mage', '!=', True)]}" >
+			<group colspan="4">
+			<field name="super_attributes" widget="many2many_tags" colspan="2" string="Configurable Attributes" />
+			<button name="update_variants" type="object" string="Update Variants" colspan="2"/>
+			</group>
+                        <separator string="Variants" colspan="4"/>
+			<field name="associated_products" nolabel="1" colspan="4" widget="one2many_list" >
+			    <tree>
+				<field name="name" />
+				<field name="default_code" />
+				<field name="list_price" />
+			    </tree>
+			</field>
+                    </page>
+		    <page string="Magento" attrs="{'invisible': [('sync_to_mage', '!=', True)]}">
+		        <group string="General">
+			    <field name="set" />
+			    <field name="mage_type" />
+			    <field name="mage_tax_class" />
+			    <field name="mage_manage_stock" />
+		        </group>
+			<group string="Stuff">
+			    <field name="visibility" />
+			    <field name="mage_status" />
+			    <field name="url_key" />
+			</group>
+			<newline/>
+			<separator string="Categories" colspan="4" />
+			<field name="categories" colspan="4" nolabel="1" />
+                        <newline/>
+                        <separator string="Websites" colspan="4" />
+                        <field name="websites" colspan="4" nolabel="1" />
+		    </page>
+                </xpath> 
+	    </field>
+	</record>
+
+    </data>
+</openerp>
