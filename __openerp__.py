@@ -3,7 +3,7 @@
     'version': '1.1',
     'author': 'Kyle Waid',
     'category': 'Sales Management',
-    'depends': ['mage_look_and_feel', 'payment_method', 'delivery'],
+    'depends': ['payment_method', 'delivery'],
     'website': 'https://www.gcotech.com',
     'description': """ 
     """,
