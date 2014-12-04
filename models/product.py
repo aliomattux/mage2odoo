@@ -67,7 +67,7 @@ class ProductProduct(osv.osv):
     def get_or_create_odoo_record(self, cr, uid, job, external_id):
         product_id = self.get_mage_record(cr, uid, external_id)
 	if not product_id:
-	    product_id = self.get_and_create_mage_record(cr, uid, job, 'ol_catalog_product.otherinfo', external_id)
+	    product_id = self.get_and_create_mage_record(cr, uid, job, 'oo_catalog_product.info', external_id)
 
 	return self.browse(cr, uid, product_id)
 
@@ -119,3 +119,26 @@ class ProductProduct(osv.osv):
         website_obj = self.pool.get('mage.website')
         website_ids = website_obj.search(cr, uid, [('external_id', 'in', websites)])
         return [(6, 0, website_ids)]
+
+
+    def _find_attribute_values(self, cr, uid, external_attribute_ids):
+        attribute_obj = self.pool.get('product.attribute.value')
+	external_ids = external_attribute_ids.split(',')
+        attribute_ids = attribute_obj.search(cr, uid, [
+                ('external_id', 'in', external_ids)
+        ])
+
+        return [(6, 0, attribute_ids)]
+
+
+    def _find_attribute_value(self, cr, uid, external_attribute_id):
+        attribute_obj = self.pool.get('product.attribute.value')
+
+        attribute_ids = attribute_obj.search(cr, uid, [
+                ('external_id', '=', external_attribute_id)
+        ])
+
+        if attribute_ids:
+            return attribute_ids[0]
+
+        return False

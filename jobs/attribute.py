@@ -33,7 +33,7 @@ class MageIntegrator(osv.osv_memory):
 	set_ids = set_obj.search(cr, uid, [])
 	set_data = set_obj.read(cr, uid, set_ids, fields=['external_id'])
 	sets = [x['external_id'] for x in set_data]
-	records = self._get_job_data(cr, uid, job, 'ol_catalog_product_attribute_group.list', \
+	records = self._get_job_data(cr, uid, job, 'oo_catalog_product_attribute_group.list', \
 		[{'attribute_set_id': {'in': sets}}])
 
 	for record in records:
@@ -46,7 +46,7 @@ class MageIntegrator(osv.osv_memory):
 
     def import_attributes(self, cr, uid, job, context=None):
 	attribute_obj = self.pool.get('product.attribute')
-        records = self._get_job_data(cr, uid, job, 'ol_catalog_product_attribute.list', [])
+        records = self._get_job_data(cr, uid, job, 'oo_catalog_product_attribute.list', [])
 	for record in records:
             if record.get('is_visible') == '0':
                 continue
@@ -63,7 +63,7 @@ class MageIntegrator(osv.osv_memory):
        attr_data = attr_obj.read(cr, uid, attr_ids, fields=['external_id'])
        attributes = [x['external_id'] for x in attr_data]
        for attribute in attributes:
-            records = self._get_job_data(cr, uid, job, 'ol_catalog_product_attribute.options', [attribute])
+            records = self._get_job_data(cr, uid, job, 'oo_catalog_product_attribute.options', [attribute])
 	    for record in records:
 		vals = value_obj.prepare_odoo_record_vals(cr, uid, job, record)
 		value_obj.upsert_mage_record(cr, uid, vals)
@@ -104,7 +104,7 @@ class MageIntegrator(osv.osv_memory):
 	group_obj = self.pool.get('product.attribute.group')
 	buffer = {}
 	for set in sets:
-            records = self._get_job_data(cr, uid, job, 'ol_catalog_product_attribute.relations', [set])
+            records = self._get_job_data(cr, uid, job, 'oo_catalog_product_attribute.relations', [set])
 	    count = 0
 	    for record in records:
 		if not record['attribute_id']:

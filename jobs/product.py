@@ -17,7 +17,7 @@ class MageIntegrator(osv.osv_memory):
 	product_ids = product_obj.search(cr, uid, [('mage_type', '=', 'configurable')])
 	product_data = product_obj.read(cr, uid, product_ids, fields=['external_id'])
 	external_ids = [x['external_id'] for x in product_data]
-        records = self._get_job_data(cr, uid, job, 'ol_catalog_product.associatedproducts', [external_ids])
+        records = self._get_job_data(cr, uid, job, 'oo_catalog_product.associatedproducts', [external_ids])
 
 	#For each configurable, locate available child products
 	for record in records:
@@ -35,12 +35,13 @@ class MageIntegrator(osv.osv_memory):
 
 
     def import_products(self, cr, uid, job, context=None):
-	product_ids = self._get_job_data(cr, uid, job, 'ol_catalog_product.search', [])
+	#TODO: This needs to be broken up more, allow variables like start/stop id
+	product_ids = self._get_job_data(cr, uid, job, 'oo_catalog_product.allsqlsearch', [])
 	datas = [product_ids[i:i+900] for i in range(0, len(product_ids), 900)]
         mappinglines = self._get_mappinglines(cr, uid, job.mapping.id)
 
 	for data in datas:
-            records = self._get_job_data(cr, uid, job, 'ol_catalog_product.biglist', [data])
+            records = self._get_job_data(cr, uid, job, 'oo_catalog_product.multinfo', [data])
             self.process_mage_products_response(cr, uid, job, mappinglines, records)
 	    cr.commit()
 	return True

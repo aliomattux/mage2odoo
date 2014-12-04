@@ -56,7 +56,7 @@ class MageIntegrator(osv.osv_memory):
 
     def import_websites(self, cr, uid, job, context=None):
 	website_obj = self.pool.get('mage.website')
-        records = self._get_job_data(cr, uid, job, 'ol_websites.list', [])
+        records = self._get_job_data(cr, uid, job, 'oo_websites.list', [])
         for record in records:
             vals = website_obj.prepare_odoo_record_vals(cr, uid, job, record)
             result = website_obj.upsert_mage_record(cr, uid, vals)
@@ -67,7 +67,7 @@ class MageIntegrator(osv.osv_memory):
 
     def import_store_groups(self, cr, uid, job, context=None):
 	group_obj = self.pool.get('mage.store.group')
-        records = self._get_job_data(cr, uid, job, 'ol_groups.list', [])
+        records = self._get_job_data(cr, uid, job, 'oo_groups.list', [])
         for record in records:
             vals = group_obj.prepare_odoo_record_vals(cr, uid, job, record)
             result = group_obj.upsert_mage_record(cr, uid, vals)
@@ -79,7 +79,7 @@ class MageIntegrator(osv.osv_memory):
     def import_store_views(self, cr, uid, job, context=None):
 	storeview_obj = self.pool.get('mage.store.view')
 
-        records = self._get_job_data(cr, uid, job, 'ol_storeviews.list', [])
+        records = self._get_job_data(cr, uid, job, 'oo_storeviews.list', [])
 	for record in records:
 	    vals = storeview_obj.prepare_odoo_record_vals(cr, uid, job, record)
 	    result = storeview_obj.upsert_mage_record(cr, uid, vals)
