@@ -8,7 +8,6 @@ class MageIntegrator(osv.osv_memory):
 
 
     def import_sales_orders(self, cr, uid, job, context=None):
-	print 'CALL'
 	storeview_obj = self.pool.get('mage.store.view')
 	store_ids = storeview_obj.search(cr, uid, [('do_not_import', '=', False)])
 	mappinglines = self._get_mappinglines(cr, uid, job.mapping.id)
@@ -74,15 +73,19 @@ class MageIntegrator(osv.osv_memory):
 	    if order_ids:
 		result = self._get_job_data(cr, uid, job, 'sales_order.addComment',\
 			[order['increment_id'], 'imported', 'Order Imported'])
-		print result
+
 		continue
 
 	    self.process_one_order(cr, uid, job, order, storeview, defaults, mappinglines)
 
+	    #Set the order as pending fulfillment in Magento
 	    result = self._get_job_data(cr, uid, job, 'sales_order.addComment', \
 		[order['increment_id'], 'imported', 'Order Imported'])
-	    print result
+
+	    #Once the order flagged in the external system, we must commit
+	    #Because it is not possible to rollback in an external system
 	    cr.commit()
+
 	return True
 
 
