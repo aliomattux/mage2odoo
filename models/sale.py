@@ -38,11 +38,19 @@ class SaleOrder(osv.osv):
             return carrier_obj.browse(cr, uid, carrier[0])
 
         else:
-	    
+	    product_ids = self.pool.get('product.product').search(cr, uid, \
+		[('default_code', '=', 'mage_shipping')])
+	    if not product_ids:
+		raise osv.except_osv(_('Shipping Config Error!'),_("No Shipping Product Found!"))
+
+	#TODO: figure out some manner to default a partner. Why does a shipping product
+	#Need a partner? seems ridiculous.
+#	    partner_ids = self.pool.get('res.partner').search(cr, uid, \
+#		[(')])
             vals = {
                 'name': description,
                 'mage_code': mage_method,
-		'product_id': 1,
+		'product_id': product_ids[0],
 		'partner_id': 3,
             }
 
@@ -65,7 +73,7 @@ class SaleOrder(osv.osv):
         )
 
         if type(record['payment']) != dict:
-            raise
+	    raise osv.except_osv(_('Error!'),_(""))
 
         payment_method = self.get_mage_payment_method(cr, \
                 uid, record['payment']
