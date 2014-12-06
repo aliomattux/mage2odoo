@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+
+        <record id="mage_shipping_item" model="product.product">
+            <field name="name">Magento Shipping</field>
+	    <field name="default_code">mage_shipping</field>
+            <field name="type">service</field>
+	    <field name="list_price">0.00</field>
+	    <field name="purchase_ok">False</field>
+        </record>
+    </data>
+</openerp>
