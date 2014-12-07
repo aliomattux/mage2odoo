@@ -5,14 +5,14 @@ class SaleOrder(osv.osv):
     _inherit = 'sale.order'
     _columns = {
 	'mage_store': fields.many2one('mage.store.view', 'Magento Store'),
-	'order_email': fields.char('Order Email'),
+	'order_email': fields.char('Magento Email', readonly=True),
 	'ip_address': fields.char('IP Address'),
 	'mage_order_total': fields.float('Magento Order Total'),
 	'mage_order_number': fields.char('Magento Order Number'),
 	'mage_invoice_id': fields.integer('Magento Invoice Id'),
 	'external_id': fields.integer('External Id'),
-	'mage_shipment_complete': fields.boolean('Magento Shipment Complete', readonly="1"),
-	'mage_invoice_complete': fields.boolean('Magento Billing Complete', readonly="1"),
+	'mage_shipment_complete': fields.boolean('Magento Shipment Complete', readonly=True),
+	'mage_invoice_complete': fields.boolean('Magento Billing Complete', readonly=True),
 
     }
 
