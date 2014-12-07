@@ -1,19 +1,6 @@
 <openerp>
     <data>
 
-        <record id="view_mage_carrier_mapping_tree" model="ir.ui.view">
-            <field name="name">Mage Carrier Mapping Tree</field>
-            <field name="model">mage.mapping.carrier</field>
-            <field name="arch" type="xml">
-                <tree editable="top">
-                    <field name="name" />
-		    <field name="mage_carrier_code" />
-		    <field name="odoo_carrier" />
-		    <field name="instance" />
-                </tree>
-            </field>
-        </record>
-
         <record id="view_mage_order_status_mapping_tree" model="ir.ui.view">
             <field name="name">Mage Order Status Mapping Tree</field>
             <field name="model">mage.mapping.order.state</field>
@@ -28,14 +15,6 @@
             </field>
         </record>
 
-        <record id="action_mage_carrier_mapping" model="ir.actions.act_window">
-            <field name="name">Carrier Mappings</field>
-            <field name="res_model">mage.mapping.carrier</field>
-            <field name="type">ir.actions.act_window</field>
-            <field name="view_type">form</field>
-            <field name="view_id" ref="view_mage_carrier_mapping_tree"/>
-        </record>
-
         <record id="action_mage_order_status_mapping" model="ir.actions.act_window">
             <field name="name">Status Mappings</field>
             <field name="res_model">mage.mapping.order.state</field>
@@ -43,12 +22,6 @@
             <field name="view_type">form</field>
             <field name="view_id" ref="view_mage_order_status_mapping_tree"/>
         </record>
-
-        <menuitem
-        id="menu_mage_carrier_mapping"
-        parent="menu_mage_configuration"
-        action="action_mage_carrier_mapping"
-        sequence="100"/>
 
         <menuitem
         id="menu_mage_order_status_mapping"

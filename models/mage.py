@@ -10,6 +10,9 @@ class MageSetup(osv.osv):
 	'url': fields.char('URL', required=True),
 	'username': fields.char('Username', required=True),
 	'password': fields.char('Password', required=True),
+	'default_shipping_partner': fields.many2one('res.partner', 'Default Shipping Partner'),
+	'shipping_product': fields.many2one('product.product', \
+		'Shipping Product', domain="[('type', '=', 'service')]"),
 	'picking_policy': fields.selection([
 		('direct', 'Deliver each product when available'),
 		('one', 'Deliver all products at once')], 'Shipping Policy'
@@ -18,9 +21,6 @@ class MageSetup(osv.osv):
                 ('manual', 'On Demand'),
                 ('picking', 'On Delivery Order'),
                 ('prepaid', 'Before Delivery')], 'Invoice Policy'
-	),
-	'carrier_mappings': fields.one2many('mage.mapping.carrier', 'instance', \
-		'Carrier Mappings'
 	),
 	'order_state_mappings': fields.one2many('mage.mapping.order.state', \
 		'instance', 'Order State Mappings'
@@ -121,6 +121,7 @@ class MageWebsite(osv.osv):
             'name': record['name'],
         }
 
+
 class MageStoreGroup(osv.osv):
     _name = 'mage.store.group'
     _columns = {
@@ -205,14 +206,4 @@ class MageMappingOrderState(osv.osv):
 		('invoice_except', 'Invoice Exception'),
 		('done', 'Done')], 'Odoo Order Status'
 	),
-    }
-
-
-class MageMappingCarrier(osv.osv):
-    _name = 'mage.mapping.carrier'
-    _columns = {
-        'name': fields.char('Name'),
-        'instance': fields.many2one('mage.setup', 'Magento Instance'),
-	'mage_carrier_code': fields.char('Magento Carrier Code'),
-	'odoo_carrier': fields.many2one('delivery.carrier', 'Odoo Carrier'),
     }

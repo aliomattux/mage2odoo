@@ -9,7 +9,6 @@
         parent="menu_mage_core"
         sequence="100"/>
 
-
         <record id="view_mage_setup_tree" model="ir.ui.view">
             <field name="name">Mage Setup Tree</field>
             <field name="model">mage.setup</field>
@@ -20,7 +19,6 @@
                 </tree>
             </field>
         </record>
-
 
         <record id="view_mage_setup_form" model="ir.ui.view">
             <field name="name">Mage Setup Form</field>
@@ -38,15 +36,18 @@
 			    <field name="username"/>
 			    <field name="password" password="1" />
 		        </group>
-			<group>
+			<group string="Policy Defaults">
 			    <field name="picking_policy" />
 			    <field name="invoice_policy" />
+			</group>
+			<group string="Shipping Defaults" >
+			    <field name="default_shipping_partner" />
+			    <field name="shipping_product" />
 			</group>
                     </sheet>
 		</form>
             </field>
         </record>
-
 
         <record id="action_mage_setup" model="ir.actions.act_window">
             <field name="name">Magento Setup</field>

@@ -1,10 +1,10 @@
+import datamapper
 import attribute
 import product
 import mage
 import job
 import mapping
 import mage_api
-import datamapper
 import category
 import sale
 import partner

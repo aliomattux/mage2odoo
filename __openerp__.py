@@ -19,6 +19,7 @@
 	     'views/misc.xml',
 	     'views/sale.xml',
 	     'views/stock.xml',
+	     'data/mage_shipping.xml',
     ],
     'test': [
     ],

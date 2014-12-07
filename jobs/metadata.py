@@ -10,29 +10,21 @@ class MageIntegrator(osv.osv_memory):
         self.import_websites(cr, uid, job)
         self.import_store_groups(cr, uid, job)
         self.import_store_views(cr, uid, job)
-        self.sync_instance_carriers(cr, uid, job)
+        self.sync_mage_carriers(cr, uid, job)
         self.sync_instance_order_statuses(cr, uid, job)
         return True
 
 
-    def sync_instance_carriers(self, cr, uid, job, context=None):
+    def sync_mage_carriers(self, cr, uid, job, context=None):
         records = self._get_job_data(cr, uid, job, 'sales_order.shipping_methods', [])
-        carrier_obj = self.pool.get('mage.mapping.carrier')
+        carrier_obj = self.pool.get('delivery.carrier')
 
         for record in records:
-            vals = {'mage_carrier_code': record['code'],
-                    'name': record['label']
-            }
-            existing_ids = carrier_obj.search(cr, uid,
-                [('mage_carrier_code', '=', record['code'])])
+	    vals = carrier_obj.prepare_odoo_record_vals(cr, uid, job, record)
+	    carrier = carrier_obj.upsert_mage_record(cr, uid, vals)
+	    print carrier
 
-            if not existing_ids:
-                result = carrier_obj.create(cr, uid, vals)
-                print (True, result)
-            else:
-                print (False, existing_ids[0])
-
-        return True
+	return True
 
 
     def sync_instance_order_statuses(self, cr, uid, job, context=None):

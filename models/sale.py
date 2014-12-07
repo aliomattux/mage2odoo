@@ -13,8 +13,8 @@ class SaleOrder(osv.osv):
 	'external_id': fields.integer('External Id'),
 	'mage_shipment_complete': fields.boolean('Magento Shipment Complete', readonly=True),
 	'mage_invoice_complete': fields.boolean('Magento Billing Complete', readonly=True),
-
     }
+
 
     def get_mage_payment_method(self, cr, uid, payment, context=None):
 	mage_method = payment.get('method')
@@ -31,34 +31,17 @@ class SaleOrder(osv.osv):
 	    return payment_obj.browse(cr, uid, payment_obj.create(cr, uid, vals))
 
 
-    def get_mage_shipping_method(self, cr, uid, mage_method, description, context=None):
+    def get_mage_shipping_method(self, cr, uid, job, record, context=None):
         carrier_obj = self.pool.get('delivery.carrier')
-        carrier = carrier_obj.search(cr, uid, [('mage_code', '=', mage_method)])
-        if carrier:
-            return carrier_obj.browse(cr, uid, carrier[0])
-
-        else:
-	    product_ids = self.pool.get('product.product').search(cr, uid, \
-		[('default_code', '=', 'mage_shipping')])
-	    if not product_ids:
-		raise osv.except_osv(_('Shipping Config Error!'),_("No Shipping Product Found!"))
-
-	#TODO: figure out some manner to default a partner. Why does a shipping product
-	#Need a partner? seems ridiculous.
-#	    partner_ids = self.pool.get('res.partner').search(cr, uid, \
-#		[(')])
-            vals = {
-                'name': description,
-                'mage_code': mage_method,
-		'product_id': product_ids[0],
-		'partner_id': 3,
-            }
-
+	carrier = carrier_obj.get_mage_record(cr, uid, record['code'])
+	if not carrier:
+	    vals = carrier_obj.prepare_odoo_record_vals(cr, uid, job, record)
             return carrier_obj.browse(cr, uid, carrier_obj.create(cr, uid, vals))
+	else:
+	    return carrier_obj.browse(cr, uid, carrier)
 
 
     def prepare_odoo_record_vals(self, cr, uid, job, record, storeview=False):
-	pp(record)
 	partner_obj = self.pool.get('res.partner')
 
         if record['customer_id']:
@@ -110,8 +93,11 @@ class SaleOrder(osv.osv):
 
 
         if record['shipping_method']:
+	    shipping_record = {'code': record['shipping_method'], 
+				'label': record['shipping_description']
+	    }
             delivery_method = self.get_mage_shipping_method( \
-                    cr, uid, record['shipping_method'], record['shipping_description']
+                    cr, uid, job, shipping_record
             )
             vals.update({'carrier_id': delivery_method.id})
 

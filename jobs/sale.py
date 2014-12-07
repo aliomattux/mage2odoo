@@ -1,7 +1,7 @@
 from openerp.osv import osv, fields
 from pprint import pprint as pp
 from openerp.tools.translate import _
-#raise osv.except_osv(_('Data Error'), _(''))
+
 class MageIntegrator(osv.osv_memory):
 
     _inherit = 'mage.integrator'
