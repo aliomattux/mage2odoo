@@ -37,33 +37,33 @@
             </field>
         </record>
 
-	<record id="view_mage_order_form" model="ir.ui.view">
-	    <field name="name">Mage Sale Order Form</field>
-	    <field name="model">sale.order</field>
-	    <field name="inherit_id" ref="sale.view_order_form" />
-	    <field name="arch" type="xml">
-		<field name="date_order" position="after" >
-		    <field name="order_email" />
-		</field>
-	    </field>
-	</record>
-
-        <record id="view_mage_shipping_form" model="ir.ui.view">
-            <field name="name">Mage Sale Order Shipping Form</field>
+        <record id="view_mage_order_form" model="ir.ui.view">
+            <field name="name">Mage Sale Order Form</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="payment_method.view_sale_billing_form" />
             <field name="arch" type="xml">
+		<field name="partner_invoice_id" position="replace" />
+		<field name="partner_shipping_id" position="replace" />
+		<field name="partner_id" position="replace">
+		    <field name="partner_id" on_change="onchange_partner_id(partner_id, context)" domain="[('customer','=',True)]" context="{'search_default_customer':1}" options='{"always_reload": True}'/>
+		    <field name="external_id" invisible="1" />
+		    <field name="order_email" />
+		</field>
 		<group name="payment" position="inside">
 		    <field name="mage_invoice_complete" />
+		</group>
+		<group name="payment" position="before" >
+		    <group>
+			 <field name="partner_invoice_id" groups="sale.group_delivery_invoice_address" context="{'default_type':'invoice', 'show_address': 1}" options='{"always_reload": True}'/>
+		    </group>
 		</group>
                 <page string="Billing" position="after" >
                     <page string="Shipping" >
 			<group>
-			    <group name="carrier" string="Delivery">
-			    </group>
-			    <group name="shipping" string="General">
-			        <field name="mage_shipment_complete" />
-			    </group>
+			    <field name="partner_shipping_id" on_change="onchange_delivery_id(company_id, partner_id, partner_shipping_id, fiscal_position)" groups="sale.group_delivery_invoice_address" context="{'default_type':'delivery', 'show_address': 1}" options='{"always_reload": True}'/>
+			</group>
+			<group name="carrier" string="Delivery">
+			    <field name="mage_shipment_complete" />
 			</group>
                         <group string="Delivery Orders" name="pickings">
                             <field name="picking_ids" nolabel="1" widget="one2many_list">
@@ -79,11 +79,21 @@
 	    </field>
 	</record>
 
+	<record id="view_mage_sale_stock_form" model="ir.ui.view">
+	    <field name="name">Mage Sale Stock Order Form</field>
+	    <field name="model">sale.order</field>
+	    <field name="inherit_id" ref="sale_stock.view_order_form_inherit"/>
+	    <field name="arch" type="xml">
+                <field name="warehouse_id" position="after">
+                    <field name="mage_store" />
+                </field>
+	    </field>
+	</record>
 
         <record id="delivery.view_order_withcarrier_form" model="ir.ui.view">
             <field name="name">delivery.sale.order_withcarrier.form.view</field>
             <field name="model">sale.order</field>
-            <field name="inherit_id" ref="view_mage_shipping_form"/>
+            <field name="inherit_id" ref="view_mage_order_form"/>
             <field name="arch" type="xml">
 		<group name="carrier" position="inside">
                         <label for="carrier_id"/>
@@ -100,17 +110,6 @@
                 </group>
             </field>
         </record>
-
-	<record id="view_mage_sale_stock_form" model="ir.ui.view">
-	    <field name="name">Mage Sale Stock Order Form</field>
-	    <field name="model">sale.order</field>
-	    <field name="inherit_id" ref="sale_stock.view_order_form_inherit"/>
-	    <field name="arch" type="xml">
-                <field name="warehouse_id" position="after">
-                    <field name="mage_store" />
-                </field>
-	    </field>
-	</record>
 
 	<record id="sale.action_quotations" model="ir.actions.act_window">
 	    <field name="name">Quotations</field>
