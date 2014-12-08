@@ -3,10 +3,7 @@ from openerp.osv import osv, fields
 class StockPicking(osv.osv):
     _inherit = 'stock.picking'
     _columns = {
-	'mage_export_state': fields.selection([('pending', 'Pending'),
-					('exception', 'Exception'),
-					('done', 'Complete')
-	], 'Magento Shipment Export State'),
+	'mage_export_error': fields.boolean('Magento Export Error'),
 	'external_id': fields.integer('Magento Shipment ID'),
         'sale': fields.many2one('sale.order', 'Sale Order'),
 	'purchase': fields.many2one('purchase.order', 'Purchase Order'),

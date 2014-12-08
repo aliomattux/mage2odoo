@@ -10,8 +10,9 @@ import sale
 import partner
 import country
 import payment
-import carrier
+import delivery
 import tax
 import invoice
 import stock
 import procurement
+import package
