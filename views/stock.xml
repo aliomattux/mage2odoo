@@ -11,7 +11,6 @@
 		</field>
 		<field name="backorder_id" position="after" >
 		    <field name="sale" attrs="{'invisible': [('sale', '=', False)]}" />
-		    <field name="purchase" attrs="{'invisible': [('purchase', '=', False)]}" />
 		    <field name="mage_store" attrs="{'invisible': [('mage_store', '=', False)]}"/>
 		</field>
 	    </field>
