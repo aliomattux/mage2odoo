@@ -75,6 +75,11 @@
                             </field>
                         </group>
                     </page>
+		    <page string="Tracking" >
+			<group string="Packages">
+			    <field name="packages" widget="one2many_list" nolabel="1"/>
+			</group>
+		    </page>
                 </page>
 	    </field>
 	</record>

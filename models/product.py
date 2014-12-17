@@ -64,6 +64,10 @@ class ProductTemplate(osv.osv):
 class ProductProduct(osv.osv):
     _inherit = 'product.product'
 
+
+    _sql_constraints = [('default_code_uniq', 'unique (default_code)', 'The SKU must be unique!')]
+
+
     def get_or_create_odoo_record(self, cr, uid, job, external_id):
         product_id = self.get_mage_record(cr, uid, external_id)
 	if not product_id:

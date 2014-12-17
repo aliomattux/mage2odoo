@@ -10,6 +10,7 @@ class SaleOrder(osv.osv):
 	'mage_order_total': fields.float('Magento Order Total'),
 	'mage_order_number': fields.char('Magento Order Number'),
 	'mage_invoice_id': fields.integer('Magento Invoice Id'),
+	'packages': fields.one2many('stock.out.package', 'sale', 'Packages'),
 	'external_id': fields.integer('External Id'),
 	'mage_shipment_complete': fields.boolean('Magento Shipment Complete', readonly=True),
 	'mage_invoice_complete': fields.boolean('Magento Billing Complete', readonly=True),
