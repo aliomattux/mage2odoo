@@ -5,25 +5,7 @@ class MageIntegrator(osv.osv_memory):
 
     _inherit = 'mage.integrator'
 
-
-    def ship_mage_orders(self, cr, uid, job, context=None):
-        response = self._get_job_data(cr, uid, job, \
-                'sales_order_invoice.create_tracking', ['100009050', False, \
-                        False, False, '1234567', 'ups', 'Tracking Title'])
-        print 'Response', response
-
-        return True
-
-
-    def invoice_mage_orders(self, cr, uid, job, context=None):
-	comment = 'Captured Amount: 29.44'
-        response = self._get_job_data(cr, uid, job, \
-		'sales_order_invoice.capture_create', ['100009048', comment, False, False])
-	print 'Response', response
-
-        return True
-
-
+    #This is a temoporary method. Ideal solution does not involve a direct sql query
     def get_pending_invoices(self, cr, uid, storeview_id):
 	query = "SELECT rel.order_id, rel.invoice_id" \
 		"\nFROM sale_order_invoice_rel rel" \
