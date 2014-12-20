@@ -79,7 +79,7 @@ class ProductProduct(osv.osv):
     def prepare_odoo_record_vals(self, cr, uid, job, record, context=None):
 	set_obj = self.pool.get('product.attribute.set')
         vals = {
-                'description': record['description'],
+                'description': record.get('description', ' '),
                 'mage_status': record['status'],
                 'name': record['name'],
                 'default_code': record['sku'],
