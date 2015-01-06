@@ -4,7 +4,7 @@ from openerp.osv import osv, fields
 class ProductCategory(osv.osv):
     _inherit = 'product.category'
     _columns = {
-	'external_id': fields.integer('External Id', select=True),
+	'external_id': fields.integer('External Id', select=True, copy=False),
 	'position': fields.integer('Position'),
 	'mage_active': fields.boolean('Mage Active'),
     }

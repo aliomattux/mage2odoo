@@ -6,7 +6,7 @@ class ResPartner(osv.osv):
     _columns = {
 		'firstname': fields.char('Firstname'),
 		'lastname': fields.char('Lastname'),
-		'external_id': fields.integer('Magento ID'),
+		'external_id': fields.integer('Magento ID', copy=False, select=True),
     }
 
 
