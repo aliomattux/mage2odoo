@@ -76,7 +76,11 @@ class MageIntegrator(osv.osv_memory):
 
 		continue
 
-	    self.process_one_order(cr, uid, job, order, storeview, defaults, mappinglines)
+	    try:
+	        self.process_one_order(cr, uid, job, order, storeview, defaults, mappinglines)
+
+	    except Exception, e:
+		continue
 
 	    #Set the order as pending fulfillment in Magento
 	    result = self._get_job_data(cr, uid, job, 'sales_order.addComment', \
