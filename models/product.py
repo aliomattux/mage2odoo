@@ -16,7 +16,7 @@ class ProductTemplate(osv.osv):
 
     _columns = {
 	'set': fields.many2one('product.attribute.set', 'Attribute Set'),
-	'upc': fields.char('UPC'),
+	'upc': fields.char('UPC', select=True),
 	'short_description': fields.text('Short Descripton'),
 	'categories': fields.many2many('product.category', 'mage_product_categories_rel', \
 		'product_id', 'category_id', 'Categories'
@@ -49,8 +49,8 @@ class ProductTemplate(osv.osv):
         ], 'Mage Product Type'),
 	'url_key': fields.char('URL Key'),
 	'mage_manage_stock': fields.boolean('Manage Stock'),
-	'external_id': fields.integer('External Id', select=True),
-	'sync_to_mage': fields.boolean('Magento Sync'),
+	'external_id': fields.integer('External Id', select=True, copy=False),
+	'sync_to_mage': fields.boolean('Magento Sync', copy=False),
         'super_attributes': fields.many2many('product.attribute',
                 'product_super_attribute_rel', 'product_tmpl_id', 'attribute_id', 'Super Attributes',
 		domain="[('scope', '=', '1'), ('is_configurable', '=', True), ('is_user_defined', '=', True), ('frontend_input', '=', 'select')]"),
