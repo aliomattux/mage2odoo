@@ -4,7 +4,7 @@ from openerp.tools.translate import _
 class DeliveryCarrier(osv.osv):
     _inherit = 'delivery.carrier'
     _columns = {
-	'mage_code': fields.char('Magento ID', select=True, readonly=True),
+	'mage_code': fields.char('Magento ID', select=True, readonly=True, copy=False),
 	'mage_carrier': fields.selection([('ups', 'UPS'),
 					  ('usps', 'USPS'),
 					  ('fedex', 'FedEx'),

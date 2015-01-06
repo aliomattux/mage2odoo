@@ -22,7 +22,7 @@ class ProductAttributeSet(osv.osv):
 	return True
 
     _columns = {
-	'external_id': fields.integer('External Id', select=True),
+	'external_id': fields.integer('External Id', select=True, copy=False),
 	'name': fields.char('Name'),
 	'groups': fields.one2many('product.attribute.group', 'set', 'Attribute Groups'),
 	'attributes': fields.function(_attribute_ids, method=True, type="boolean", store=False, string="Attributes"),
@@ -41,7 +41,7 @@ class ProductAttributeGroup(osv.osv):
     _description = "Product Attribute Group"
     _order = 'sort_order'
     _columns = {
-	'external_id': fields.integer('External Id'),
+	'external_id': fields.integer('External Id', select=True, copy=False),
 	'name': fields.char('name'),
 	'set': fields.many2one('product.attribute.set', 'Attribute Set'),
 	'default': fields.integer('Default'),
@@ -95,7 +95,7 @@ class ProductAttribute(osv.osv):
 	],'Apply To'),
 #	'apply_to_selections': fields.many2many('mage.product.type', 'mage_attribute_prod_type_rel', 
 #		'attribute', 'type', 'Selections'),
-	'external_id': fields.char('External Id', select=True),
+	'external_id': fields.char('External Id', select=True, copy=False),
 	'attribute_code': fields.char('Attribute Code', select=True),
 	'default_value': fields.char('Default Value'),
 	'ttype': fields.char('Odoo Model Field Type'),

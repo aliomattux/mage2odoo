@@ -7,13 +7,13 @@ class SaleOrder(osv.osv):
 	'mage_store': fields.many2one('mage.store.view', 'Magento Store'),
 	'order_email': fields.char('Magento Email', readonly=True),
 	'ip_address': fields.char('IP Address'),
-	'mage_order_total': fields.float('Magento Order Total'),
-	'mage_order_number': fields.char('Magento Order Number'),
-	'mage_invoice_id': fields.integer('Magento Invoice Id'),
-	'packages': fields.one2many('stock.out.package', 'sale', 'Packages'),
-	'external_id': fields.integer('External Id'),
-	'mage_shipment_complete': fields.boolean('Magento Shipment Complete', readonly=True),
-	'mage_invoice_complete': fields.boolean('Magento Billing Complete', readonly=True),
+	'mage_order_total': fields.float('Magento Order Total', copy=False),
+	'mage_order_number': fields.char('Magento Order Number', select=True),
+	'mage_invoice_id': fields.integer('Magento Invoice Id', copy=False, select=True),
+	'packages': fields.one2many('stock.out.package', 'sale', 'Packages', copy=False),
+	'external_id': fields.integer('External Id', copy=False, select=True),
+	'mage_shipment_complete': fields.boolean('Magento Shipment Complete', readonly=True, copy=False),
+	'mage_invoice_complete': fields.boolean('Magento Billing Complete', readonly=True, copy=False),
     }
 
 

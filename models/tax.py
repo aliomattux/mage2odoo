@@ -14,10 +14,10 @@ class AccountTax(osv.Model):
     _inherit = 'account.tax'
 
     _columns = {
-        'mage_tax': fields.boolean('Is this tax used on magento ?'),
+        'mage_tax': fields.boolean('Is this tax used on magento ?', copy=False),
         'apply_on_magento_shipping': fields.boolean(
             'Is this tax applied on magento shipping ?',
-            help='This tax should have *Tax Included in Price* set as True'
+            help='This tax should have *Tax Included in Price* set as True', copy=False
         )
     }
 
