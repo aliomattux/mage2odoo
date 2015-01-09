@@ -55,8 +55,18 @@ class ResPartner(osv.osv):
         ):
             return False
 
+	addr_lines = address_data['street'].split('\r').split('\n')
+
+	addr_line1 = addr_lines[0]
+
+	if len(addr_lines) > 1:
+	    addr_line2 = addr_lines[1]
+	else:
+	    addr_line2 = None
+
         if not all([
-            (address.street or None) == address_data['street'],
+            (address.street or None) == addr_line1,
+	    (address.street2 or None) == addr_line2,
             (address.zip or None) == address_data['postcode'],
             (address.city or None) == address_data['city'],
             (address.phone or None) == address_data['telephone'],
