@@ -15,6 +15,8 @@ class MageIntegrator(osv.osv_memory):
 	    for package in package_obj.browse(cr, uid, package_ids):
 		if package.picking.sale.mage_shipment_complete and package.picking.external_id:
 		    result = self.send_one_package(cr, uid, job, package.picking.external_id, package, True)
+		    package.mage_package_state = 'done'
+		    cr.commit()
 		else:
 		    shipping_id = self.send_one_package(cr, uid, job, package.picking.sale.mage_order_number, package, False)
 		    if shipping_id:
@@ -28,6 +30,7 @@ class MageIntegrator(osv.osv_memory):
 			package.mage_package_state = 'exception'
 			package.picking.mage_export_error = True
 
+		    cr.commit()
         return True
 
 
@@ -54,16 +57,16 @@ class MageIntegrator(osv.osv_memory):
 		response = self._get_job_data(cr, uid, job, \
 			'sales_order_shipment.addTrack', [incrementid, base_carrier, \
 			'Shipped', package.tracking_number])
-		print 'RESPONSE', response
 	    except Exception, e:
+		print 'Exception', e
 		return False
 	else:
             try:
 		response = self._get_job_data(cr, uid, job, \
                 	'sales_order_invoice.create_tracking', [incrementid, False, \
                         False, False, package.tracking_number, base_carrier, 'Shipped'])
-		print 'RESPONSE', response
             except Exception, e:
+		print 'Exception', e
 		return False
 
 
