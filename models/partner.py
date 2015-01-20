@@ -55,8 +55,8 @@ class ResPartner(osv.osv):
         ):
             return False
 
-	addr_lines = address_data['street'].split('\r').split('\n')
-
+        address_data['street'] = address_data['street'].replace('\r', '\n')
+        addr_lines = address_data['street'].split('\n')
 	addr_line1 = addr_lines[0]
 
 	if len(addr_lines) > 1:
