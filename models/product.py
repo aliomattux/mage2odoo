@@ -1,6 +1,7 @@
 from openerp.osv import osv, fields
 from magento import Product
 from pprint import pprint as pp
+from openerp.tools.translate import _
 
 PRODUCT_TYPES = {
                 'simple': 'product',
@@ -146,3 +147,20 @@ class ProductProduct(osv.osv):
             return attribute_ids[0]
 
         return False
+
+
+    def create(self, cr, uid, data, context=None):
+	if data.get('default_code'):
+	    try:
+	        id = super(product_uom, self).create(cr, uid, data, context)
+	        return id
+
+	    except Exception, e:
+	        ids = self.search(cr, uid, [('default_code', '=', data['default_code'])])
+		if ids:
+		    self.write(cr, uid, ids[0], data)
+	            return ids[0]
+		else:
+		    raise osv.except_osv(_('Error!'), _(e))
+	else:
+	    return super(product_uom, self).create(cr, uid, data, context)
