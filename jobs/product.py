@@ -44,6 +44,7 @@ class MageIntegrator(osv.osv_memory):
             records = self._get_job_data(cr, uid, job, 'oo_catalog_product.multinfo', [data])
             self.process_mage_products_response(cr, uid, job, mappinglines, records)
 	    cr.commit()
+
 	return True
 
 
@@ -51,10 +52,13 @@ class MageIntegrator(osv.osv_memory):
 #        target_obj = self.pool.get(job.mapping.model_id.model)
 	product_obj = self.pool.get('product.product')
         for record in records:
-	    vals = product_obj.prepare_odoo_record_vals(cr, uid, job, record)
-            vals.update(self._transform_record(cr, uid, job, record, 'from_mage_to_odoo', mappinglines))
-            result = product_obj.upsert_mage_record(cr, uid, vals)
-	    print result
+	    try:
+	        vals = product_obj.prepare_odoo_record_vals(cr, uid, job, record)
+                vals.update(self._transform_record(cr, uid, job, record, \
+			'from_mage_to_odoo', mappinglines))
+                result = product_obj.upsert_mage_record(cr, uid, vals)
+	    except Exception, e:
+		continue
 
         return True
 
