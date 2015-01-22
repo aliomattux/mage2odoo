@@ -14,3 +14,12 @@ class StockOutPackage(osv.osv):
     _defaults = {
 	'mage_package_state': 'pending',
     }
+
+
+    def create(self, cr, uid, data, context=None):
+	if data.get('picking'):
+	    picking = self.pool.get('stock.picking').browse(cr, uid, data['picking'])
+	    if picking.sale:
+		data['sale'] = picking.sale.id
+
+        return super(StockOutPackage, self).create(cr, uid, data, context=context)
