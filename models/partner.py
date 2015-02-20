@@ -94,11 +94,23 @@ class ResPartner(osv.osv):
             ).id
         else:
             state_id = None
+
+
+        address_data['street'] = address_data['street'].replace('\r', '\n')
+        addr_lines = address_data['street'].split('\n')
+        addr_line1 = addr_lines[0]
+
+        if len(addr_lines) > 1:
+            addr_line2 = addr_lines[1]
+        else:
+            addr_line2 = None
+
         address_id = self.create(cr, uid, {
             'name': u' '.join(
                 [address_data['firstname'], address_data['lastname']]
             ),
-            'street': address_data['street'],
+            'street': addr_line1,
+            'street2': addr_line2,
             'state_id': state_id,
             'country_id': country.id,
             'city': address_data['city'],
