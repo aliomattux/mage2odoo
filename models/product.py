@@ -149,18 +149,18 @@ class ProductProduct(osv.osv):
         return False
 
 
-    def create(self, cr, uid, data, context=None):
-	if data.get('default_code'):
-	    try:
-	        id = super(product_uom, self).create(cr, uid, data, context)
-	        return id
+    def upsert_mage_record(self, cr, uid, vals, record_id=False):
+        if record_id:
+            self.write(cr, uid, record_id, vals)
+            return record_id
 
-	    except Exception, e:
-	        ids = self.search(cr, uid, [('default_code', '=', data['default_code'])])
-		if ids:
-		    self.write(cr, uid, ids[0], data)
-	            return ids[0]
-		else:
-		    raise osv.except_osv(_('Error!'), _(e))
-	else:
-	    return super(product_uom, self).create(cr, uid, data, context)
+        existing_id = self.get_mage_record(cr, uid, vals['external_id'])
+        if not existing_id and vals.get('default_code'):
+	    existing_id = self.search(cr, uid, [('default_code', '=', vals['default_code'])])
+
+        if existing_id:
+            self.write(cr, uid, existing_id, vals)
+            return existing_id
+
+        else:
+            return self.create(cr, uid, vals)
