@@ -62,7 +62,6 @@ class SaleOrder(osv.osv):
         payment_method = self.get_mage_payment_method(cr, \
                 uid, record['payment']
         )
-
         vals = {
                 'mage_order_number': record['increment_id'],
 #               'order_policy':
@@ -121,7 +120,6 @@ class SaleOrder(osv.osv):
                 cr, uid, record
                 )
             )
-
 	return vals
 
 
@@ -162,7 +160,7 @@ class SaleOrder(osv.osv):
 
             # If the product is a child product of a bundle product, do not
             # create a separate line for this.
-            if 'bundle_option' in item['product_options'] and \
+            if item['product_options'] and 'bundle_option' in item['product_options'] and \
                     item['parent_item_id']:
                 continue
 
@@ -184,9 +182,16 @@ class SaleOrder(osv.osv):
 #        taxes = self.get_magento_shipping_tax(
 #            cr, uid, order, context
  #       )
+	#Solves bug where free shipping is none type
+
+	if order.get('shipping_incl_tax'):
+	    price_unit = float(order.get('shipping_incl_tax'))
+	else:
+	    price_unit = 0.00
+
         return (0, 0, {
             'name': 'Magento Shipping',
-            'price_unit': float(order.get('shipping_incl_tax', 0.00)),
+            'price_unit': price_unit,
             'product_uom': 1,
   #          'tax_id': [(6, 0, taxes)],
           #  'magento_notes': ' - '.join([
@@ -207,10 +212,17 @@ class SaleOrder(osv.osv):
         :param order_data: Order Data from magento
         :param context: Application context
         """
-
+	if order['discount_description']:
+	    description = order['discount_description']
+	else:
+	    description = 'Discount'
+	if order.get('discount_amount'):
+	    amount = float(order.get('discount_amount'))
+	else:
+	    amount = 0
         return (0, 0, {
-            'name': 'Discount - ' + order['discount_description'] or 'Magento Discount',
-            'price_unit': float(order.get('discount_amount', 0.00)),
+            'name': 'Discount - ' + description,
+            'price_unit': amount,
             'product_uom': 1,
 #            'magento_notes': order_data['discount_description'],
         })
