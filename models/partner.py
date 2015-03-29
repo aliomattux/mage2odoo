@@ -16,10 +16,14 @@ class ResPartner(osv.osv):
 	    return self.browse(cr, uid, partner[0])
 
 	else:
+	    firstname = record['customer_firstname']
+	    lastname = record['customer_lastname']
+	    if not lastname:
+		lastname = 'no lastname'
 	    vals = {
-		    'firstname': record['customer_firstname'],
-		    'lastname': record['customer_lastname'],
-		    'name': record['customer_firstname'] + ' ' + record['customer_lastname'],
+		    'firstname': firstname,
+		    'lastname': lastname,
+		    'name': firstname + ' ' + lastname,
 		    'email': record['customer_email'],
 		    'external_id': record['customer_id'],
 
