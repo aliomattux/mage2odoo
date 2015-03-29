@@ -1,6 +1,7 @@
 from openerp.osv import osv, fields
 from pprint import pprint as pp
 from openerp.tools.translate import _
+from datetime import datetime
 
 class MageIntegrator(osv.osv_memory):
 
@@ -21,6 +22,8 @@ class MageIntegrator(osv.osv_memory):
 
 	for storeview in storeview_obj.browse(cr, uid, store_ids):
 	    self.import_one_storeview_orders(cr, uid, job, storeview, defaults, mappinglines)
+	    storeview_obj.write(cr, uid, storeview.id, {'last_import_datetime': datetime.utcnow()})
+	    cr.commit()
 
 	return True
 
