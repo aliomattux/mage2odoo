@@ -138,7 +138,7 @@ class SaleOrder(osv.osv):
 
                 # If its a top level product, create it
                 values = {
-                    'name': item['name'],
+                    'name': item['name'] or item['sku'],
                     'price_unit': float(item['price']),
    #                 'product_uom':
     #                    website_obj.get_default_uom(
@@ -152,7 +152,8 @@ class SaleOrder(osv.osv):
                     ).id
                 }
 
-                if order['tax_identification']:
+		tax_percent = item['tax_percent']
+                if order['tax_identification'] and tax_percent and float(tax_percent) > 0.001:
                     taxes = self.get_mage_taxes(cr, uid, order['tax_identification'], item)
                     values['tax_id'] = [(6, 0, taxes)]
 

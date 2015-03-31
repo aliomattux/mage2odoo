@@ -58,7 +58,7 @@ class MageIntegrator(osv.osv_memory):
 
 	filters = {
 		'store_id': {'=':storeview.external_id},
-		'status': {'in': ['pending']}
+		'status': {'in': ['pending', 'processing']}
 	}
 
 	if start_time:
@@ -66,32 +66,36 @@ class MageIntegrator(osv.osv_memory):
 
 	order_data = self._get_job_data(cr, uid, job, 'sales_order.list', [filters])
 	order_ids = [x['increment_id'] for x in order_data]
-	orders = self._get_job_data(cr, uid, job, 'sales_order.multiload', [order_ids])
-	if not orders:
-	    return True
+	datas = [order_ids[i:i+300] for i in range(0, len(order_ids), 300)]
+	for dataset in datas:
+	    orders = self._get_job_data(cr, uid, job, 'sales_order.multiload', [dataset])
+	    if not orders:
+	        return True
 
-	for order in orders:
-	    order_obj = self.pool.get('sale.order')
-	    order_ids = order_obj.search(cr, uid, [('external_id', '=', order['order_id'])])
-	    if order_ids:
-		result = self._get_job_data(cr, uid, job, 'sales_order.addComment',\
-			[order['increment_id'], 'imported', 'Order Imported'])
+	    for order in orders:
+	        order_obj = self.pool.get('sale.order')
+	        order_ids = order_obj.search(cr, uid, [('external_id', '=', order['order_id'])])
+	        if order_ids:
+		    result = self._get_job_data(cr, uid, job, 'sales_order.addComment',\
+			    [order['increment_id'], 'imported', 'Order Imported'])
+		    print 'Skipping existing order %s' % record['increment_id']
+		    continue
 
-		continue
+	        try:
+	            self.process_one_order(cr, uid, job, order, storeview, defaults, mappinglines)
 
-	    try:
-	        self.process_one_order(cr, uid, job, order, storeview, defaults, mappinglines)
+	        except Exception, e:
+		    print 'Exception', e
+		    continue
 
-	    except Exception, e:
-		continue
+	        #Set the order as pending fulfillment in Magento
+	        result = self._get_job_data(cr, uid, job, 'sales_order.addComment', \
+		    [order['increment_id'], 'imported', 'Order Imported'])
 
-	    #Set the order as pending fulfillment in Magento
-	    result = self._get_job_data(cr, uid, job, 'sales_order.addComment', \
-		[order['increment_id'], 'imported', 'Order Imported'])
-
-	    #Once the order flagged in the external system, we must commit
-	    #Because it is not possible to rollback in an external system
-	    cr.commit()
+		print 'Successfully Imported order with ID: %s' % record['increment_id']
+	        #Once the order flagged in the external system, we must commit
+	        #Because it is not possible to rollback in an external system
+	        cr.commit()
 
 	return True
 
@@ -109,5 +113,4 @@ class MageIntegrator(osv.osv_memory):
             vals.update(self._transform_record(cr, uid, job, order, 'from_mage_to_odoo', mappinglines))
 
 	order = order_obj.create(cr, uid, vals)
-
         return order_obj.browse(cr, uid, order)

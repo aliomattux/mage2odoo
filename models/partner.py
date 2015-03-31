@@ -11,15 +11,21 @@ class ResPartner(osv.osv):
 
 
     def get_or_create_customer(self, cr, uid, record, context=None):
-	partner = self.search(cr, uid, [('external_id', '=', record['customer_id'])])
-	if partner:
-	    return self.browse(cr, uid, partner[0])
+
+	if record['customer_id'] == '0' or record.get('customer_is_guest') \
+		and record.get('customer_is_guest') == '1':
+	    partner_ids = []
+
+	else:
+	    partner_ids = self.search(cr, uid, [('external_id', '=', \
+		record['customer_id'])], limit=1)
+
+	if partner_ids:
+	    return self.browse(cr, uid, partner_ids[0])
 
 	else:
 	    firstname = record['customer_firstname']
-	    lastname = record['customer_lastname']
-	    if not lastname:
-		lastname = 'no lastname'
+	    lastname = record['customer_lastname'] or 'no lastname'
 	    vals = {
 		    'firstname': firstname,
 		    'lastname': lastname,
@@ -54,8 +60,10 @@ class ResPartner(osv.osv):
 
     def match_mage_address(self, cr, uid, address, address_data):
         # Check if the name matches
+	firstname = address_data['firstname']
+	lastname = address_data['lastname'] or 'no lastname'
         if address.name != u' '.join(
-            [address_data['firstname'], address_data['lastname']]
+            [firstname, lastname]
         ):
             return False
 
@@ -108,10 +116,11 @@ class ResPartner(osv.osv):
             addr_line2 = addr_lines[1]
         else:
             addr_line2 = None
-
+	firstname = address_data['firstname']
+	lastname = address_data['lastname'] or 'no lastname'
         address_id = self.create(cr, uid, {
             'name': u' '.join(
-                [address_data['firstname'], address_data['lastname']]
+                [firstname, lastname]
             ),
             'street': addr_line1,
             'street2': addr_line2,
