@@ -40,13 +40,14 @@ class MageIntegrator(osv.osv_memory):
         if not storeview.warehouse:
             raise osv.except_osv(_('Config Error'), _('Storeview %s has no warehouse. You must assign a warehouse in order to import orders')%storeview.name)
 
-	if storeview.import_orders_start_datetime and not \
-		storeview.last_import_datetime:
+	#This needs to be reconsidered. If there is an error, it will skip it
+#	if storeview.import_orders_start_datetime and not \
+#		storeview.last_import_datetime:
 
-	    start_time = storeview.import_orders_start_datetime
+	start_time = storeview.import_orders_start_datetime
 
-	elif storeview.last_import_datetime:
-	    start_time = storeview.last_import_datetime
+#	elif storeview.last_import_datetime:
+#	    start_time = storeview.last_import_datetime
 
 	states = self.get_import_states(cr, uid, storeview)
 
@@ -81,7 +82,7 @@ class MageIntegrator(osv.osv_memory):
 	        if order_ids:
 		    result = self._get_job_data(cr, uid, job, 'sales_order.addComment',\
 			    [order['increment_id'], 'imported', 'Order Imported'])
-		    print 'Skipping existing order %s' % record['increment_id']
+		    print 'Skipping existing order %s' % order['increment_id']
 		    continue
 
 	        try:
@@ -95,7 +96,7 @@ class MageIntegrator(osv.osv_memory):
 	        result = self._get_job_data(cr, uid, job, 'sales_order.addComment', \
 		    [order['increment_id'], 'imported', 'Order Imported'])
 
-		print 'Successfully Imported order with ID: %s' % record['increment_id']
+		print 'Successfully Imported order with ID: %s' % order['increment_id']
 	        #Once the order flagged in the external system, we must commit
 	        #Because it is not possible to rollback in an external system
 	        cr.commit()
