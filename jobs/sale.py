@@ -65,6 +65,9 @@ class MageIntegrator(osv.osv_memory):
 	    filters.update({'created_at': {'gteq': start_time}})
 
 	order_data = self._get_job_data(cr, uid, job, 'sales_order.list', [filters])
+	if not order_data:
+	    return True
+
 	order_ids = [x['increment_id'] for x in order_data]
 	datas = [order_ids[i:i+300] for i in range(0, len(order_ids), 300)]
 	for dataset in datas:
