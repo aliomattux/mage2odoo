@@ -64,40 +64,50 @@ class MageIntegrator(osv.osv_memory):
 	if start_time:
 	    filters.update({'created_at': {'gteq': start_time}})
 
+	#Make the external call and get the order ids
 	order_data = self._get_job_data(cr, uid, job, 'sales_order.list', [filters])
+
 	if not order_data:
 	    return True
 
 	order_ids = [x['increment_id'] for x in order_data]
 	datas = [order_ids[i:i+300] for i in range(0, len(order_ids), 300)]
 	for dataset in datas:
-	    orders = self._get_job_data(cr, uid, job, 'sales_order.multiload', [dataset])
+	    try:
+	        orders = self._get_job_data(cr, uid, job, 'sales_order.multiload', [dataset])
+	    except Exception, e:
+		print 'Could not retrieve multiple order info'
+		continue
+
 	    if not orders:
-	        return True
+	        continue
 
 	    for order in orders:
 	        order_obj = self.pool.get('sale.order')
 	        order_ids = order_obj.search(cr, uid, [('external_id', '=', order['order_id'])])
 	        if order_ids:
-		    result = self._get_job_data(cr, uid, job, 'sales_order.addComment',\
-			    [order['increment_id'], 'imported', 'Order Imported'])
-		    print 'Skipping existing order %s' % record['increment_id']
+		    status = self.set_one_order_status(cr, uid, job, order, 'imported', 'Order Imported')
+		    print 'Skipping existing order %s' % order['increment_id']
 		    continue
 
 	        try:
-	            self.process_one_order(cr, uid, job, order, storeview, defaults, mappinglines)
+	            sale_order = self.process_one_order(cr, uid, job, order, storeview, defaults, mappinglines)
+		    #Implement something to auto approve if configured
+		    sale_order.action_button_confirm()
 
 	        except Exception, e:
-		    print 'Exception', e
+		    print 'Exception Processing Order with Id: %s' % order['increment_id'], e
 		    continue
 
-	        #Set the order as pending fulfillment in Magento
-	        result = self._get_job_data(cr, uid, job, 'sales_order.addComment', \
-		    [order['increment_id'], 'imported', 'Order Imported'])
+		status = self.set_one_order_status(cr, uid, job, order, 'imported', 'Order Imported')
 
-		print 'Successfully Imported order with ID: %s' % record['increment_id']
-	        #Once the order flagged in the external system, we must commit
-	        #Because it is not possible to rollback in an external system
+		if status:
+		    print 'Successfully Imported order with ID: %s' % order['increment_id']
+	            #Once the order flagged in the external system, we must commit
+	            #Because it is not possible to rollback in an external system
+		else:
+		    print 'Created order but could not notify Magento'
+
 	        cr.commit()
 
 	return True
@@ -116,4 +126,16 @@ class MageIntegrator(osv.osv_memory):
             vals.update(self._transform_record(cr, uid, job, order, 'from_mage_to_odoo', mappinglines))
 
 	order = order_obj.create(cr, uid, vals)
+
         return order_obj.browse(cr, uid, order)
+
+
+    def set_one_order_status(self, cr, uid, job, order, status, message, context=None):
+	try:
+            result = self._get_job_data(cr, uid, job, 'sales_order.addComment',\
+		[order['increment_id'], status, message])
+	    return True
+
+	except Exception, e:
+	    print 'Status Exception', e
+	    return False
