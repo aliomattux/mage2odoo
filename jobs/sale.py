@@ -40,13 +40,14 @@ class MageIntegrator(osv.osv_memory):
         if not storeview.warehouse:
             raise osv.except_osv(_('Config Error'), _('Storeview %s has no warehouse. You must assign a warehouse in order to import orders')%storeview.name)
 
-	if storeview.import_orders_start_datetime and not \
-		storeview.last_import_datetime:
+	#This needs to be reconsidered. If there is an error, it will skip it
+#	if storeview.import_orders_start_datetime and not \
+#		storeview.last_import_datetime:
 
-	    start_time = storeview.import_orders_start_datetime
+	start_time = storeview.import_orders_start_datetime
 
-	elif storeview.last_import_datetime:
-	    start_time = storeview.last_import_datetime
+#	elif storeview.last_import_datetime:
+#	    start_time = storeview.last_import_datetime
 
 	states = self.get_import_states(cr, uid, storeview)
 
