@@ -94,7 +94,7 @@ class MageIntegrator(osv.osv_memory):
 	        try:
 	            sale_order = self.process_one_order(cr, uid, job, order, storeview, defaults, mappinglines)
 		    #Implement something to auto approve if configured
-		    sale_order.action_button_confirm()
+#		    sale_order.action_button_confirm()
 
 	        except Exception, e:
 		    print 'Exception Processing Order with Id: %s' % order['increment_id'], e
