@@ -35,11 +35,18 @@ PRODUCT_DEFAULT_MAP = [
 
 
 DEFAULT_JOBS = [
-                {'name': 'Sync Products',
+                {'name': 'Sync All Products',
                  'mapping_model_name': 'product.product',
-                 'python_function_name': 'import_products',
+                 'python_function_name': 'import_all_products',
                  'job_type': 'system',
 		 'scheduler': False,
+		 'mapping_name': 'Product',
+		 'mapping_lines': PRODUCT_DEFAULT_MAP},
+                {'name': 'Sync Updated Products',
+                 'mapping_model_name': 'product.product',
+                 'python_function_name': 'import_updated_products',
+                 'job_type': 'system',
+		 'scheduler': True,
 		 'mapping_name': 'Product',
 		 'mapping_lines': PRODUCT_DEFAULT_MAP},
                 {'name': 'Sync Sales Orders',

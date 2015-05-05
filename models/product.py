@@ -17,7 +17,6 @@ class ProductTemplate(osv.osv):
 
     _columns = {
 	'set': fields.many2one('product.attribute.set', 'Attribute Set'),
-	'upc': fields.char('UPC', select=True),
 	'short_description': fields.text('Short Descripton'),
 	'categories': fields.many2many('product.category', 'mage_product_categories_rel', \
 		'product_id', 'category_id', 'Categories'

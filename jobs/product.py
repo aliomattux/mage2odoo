@@ -40,18 +40,40 @@ class MageIntegrator(osv.osv_memory):
 	return call
 
 
-    def get_product_job_filters(cr, uid, job, context=None):
-	filters = []
+    def get_update_filters(self):
+        filters = []
 
         return filters
 
 
-    def import_products(self, cr, uid, job, context=None):
-	#TODO: This needs to be broken up more, allow variables like start/stop id
-	call = self.get_product_job_call(cr, uid, job)
-	filters = self.get_product_job_filters(cr, uid, job)
+    def get_all_filters(self):
+        filters = []
 
+        return filters
+
+    def get_updated_api_call(self):
+	return 'oo_catalog_product.filtersearch'
+
+
+    def get_all_api_call(self):
+	return 'oo_catalog_product.filtersearch'
+
+
+    def import_updated_products(self, cr, uid, job, context=None):
+	call = self.get_updated_api_call()
+	filters = self.get_update_filters()
 	product_ids = self._get_job_data(cr, uid, job, call, filters)
+	return self.import_products(cr, uid, job, product_ids)
+
+
+    def import_all_products(self, cr, uid, job, context=None):
+	call = self.get_all_api_call()
+	filters = self.get_all_filters()
+	product_ids = self._get_job_data(cr, uid, job, call, filters)
+	return self.import_products(cr, uid, job, product_ids)
+
+
+    def import_products(self, cr, uid, job, product_ids, context=None):
 	datas = [product_ids[i:i+900] for i in range(0, len(product_ids), 900)]
         mappinglines = self._get_mappinglines(cr, uid, job.mapping.id)
 
