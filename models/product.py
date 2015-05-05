@@ -68,8 +68,13 @@ class ProductProduct(osv.osv):
     _sql_constraints = [('default_code_uniq', 'unique (default_code)', 'The SKU must be unique!')]
 
 
-    def get_or_create_odoo_record(self, cr, uid, job, external_id):
+    def get_or_create_odoo_record(self, cr, uid, job, external_id, item=False, context=None):
         product_id = self.get_mage_record(cr, uid, external_id)
+	if not product_id and item:
+	    product_ids = self.search(cr, uid, [('default_code', '=', item['sku'])])
+	    if product_ids:
+		product_id = product_ids[0]
+
 	if not product_id:
 	    product_id = self.get_and_create_mage_record(cr, uid, job, 'oo_catalog_product.info', external_id)
 
@@ -79,6 +84,7 @@ class ProductProduct(osv.osv):
     def prepare_odoo_record_vals(self, cr, uid, job, record, context=None):
 	set_obj = self.pool.get('product.attribute.set')
         vals = {
+		'active': True,
                 'description': record.get('description', ' '),
                 'mage_status': record['status'],
                 'name': record['name'],
@@ -156,7 +162,6 @@ class ProductProduct(osv.osv):
         existing_id = self.get_mage_record(cr, uid, vals['external_id'])
         if not existing_id and vals.get('default_code'):
 	    existing_id = self.search(cr, uid, [('default_code', '=', vals['default_code'])])
-
         if existing_id:
             self.write(cr, uid, existing_id, vals)
             return existing_id

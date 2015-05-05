@@ -148,7 +148,7 @@ class SaleOrder(osv.osv):
                   #  'magento_notes': item['product_options'],
 #                    'type': 'make_to_order',
                     'product_id': product_obj.get_or_create_odoo_record(
-                                cr, uid, job, item['product_id']
+                                cr, uid, job, item['product_id'], item=item,
                     ).id
                 }
 
