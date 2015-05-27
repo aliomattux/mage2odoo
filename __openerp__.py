@@ -3,7 +3,7 @@
     'version': '1.1',
     'author': 'Kyle Waid',
     'category': 'Sales Management',
-    'depends': ['payment_method', 'delivery', 'stock_package'],
+    'depends': ['payment_method', 'delivery', 'stock_package', 'product_sku_upc'],
     'website': 'https://www.gcotech.com',
     'description': """ 
     """,
