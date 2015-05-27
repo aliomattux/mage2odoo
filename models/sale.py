@@ -185,21 +185,26 @@ class SaleOrder(osv.osv):
  #       )
 	#Solves bug where free shipping is none type
 
-	if order.get('shipping_incl_tax'):
-	    price_unit = float(order.get('shipping_incl_tax'))
+	if order.get('shipping_amount'):
+	    shipping_amount = float(order.get('shipping_amount'))
+	    total_amount = float(order.get('shipping_incl_tax'))
+	    tax = float(order.get('shipping_tax_amount'))
 	else:
-	    price_unit = 0.00
+	    shipping_amount = 0.00
 
-        return (0, 0, {
-            'name': 'Magento Shipping',
-            'price_unit': price_unit,
+	vals = {'name': 'Magento Shipping',
+            'price_unit': shipping_amount,
             'product_uom': 1,
-  #          'tax_id': [(6, 0, taxes)],
-          #  'magento_notes': ' - '.join([
-           #     order['shipping_method'],
-            #    order['shipping_description']
-           # ])
-        })
+        }
+
+	if tax and total_amount:
+	    tax_percentage = round((total_amount - shipping_amount) / shipping_amount, 2) * 100
+
+        if order['tax_identification'] and tax_percentage and float(tax_percentage) > 0.001:
+            taxes = self.get_mage_taxes(cr, uid, order['tax_identification'], item_data={'tax_percent': tax_percentage})
+            vals['tax_id'] = [(6, 0, taxes)]
+
+        return (0, 0, vals)
 
 
     def get_discount_line_data_using_magento_data(
