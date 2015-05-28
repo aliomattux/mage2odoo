@@ -187,8 +187,8 @@ class SaleOrder(osv.osv):
 
 	if order.get('shipping_amount'):
 	    shipping_amount = float(order.get('shipping_amount'))
-	    total_amount = float(order.get('shipping_incl_tax'))
-	    tax = float(order.get('shipping_tax_amount'))
+	    total_amount = order.get('shipping_incl_tax')
+	    tax = order.get('shipping_tax_amount')
 	else:
 	    shipping_amount = 0.00
 
@@ -200,7 +200,7 @@ class SaleOrder(osv.osv):
 	tax_percentage = False
 
 	if tax and total_amount:
-	    tax_percentage = round((total_amount - shipping_amount) / shipping_amount, 2) * 100
+	    tax_percentage = round((float(total_amount)- shipping_amount) / shipping_amount, 2) * 100
 
         if order['tax_identification'] and tax_percentage and float(tax_percentage) > 0.001:
             taxes = self.get_mage_taxes(cr, uid, order['tax_identification'], item_data={'tax_percent': tax_percentage})
