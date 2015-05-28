@@ -1,5 +1,7 @@
 from openerp.osv import osv, fields
 from pprint import pprint as pp
+from datetime import datetime
+from tzlocal import get_localzone
 
 class MageIntegrator(osv.osv_memory):
 
@@ -40,20 +42,31 @@ class MageIntegrator(osv.osv_memory):
 	return call
 
 
-    def get_update_filters(self):
-        filters = []
+    def get_update_filters(self, job):
+	status_filter = self.get_status_filter(job)
+	filters = status_filter
+	#YYYY-MM-DD
+	tz = get_localzone()
+	now = datetime.utcnow()
+	dt = tz.localize(now)
+	string = dt.strftime('%Y-%m-%d')
+	updated = {'updated_at': {'gteq': string}}
+	filters.update(updated)
 
-        return filters
+        return [filters]
+
+
+    def get_status_filter(self, job):
+        statuses = ['1']
+        if job.mage_instance.import_disabled_products:
+            statuses.append('2')
+	return {'status': {'in': statuses}}
 
 
     def get_all_filters(self, job):
-	statuses = ['1']
-	if job.mage_instance.import_disabled_products:
-	    statuses.append('2')
-
-	filters = [{'status': {'in': statuses}}]
-
-        return filters
+	status_filter = self.get_status_filter(job)
+	filters = status_filter
+        return [filters]
 
 
     def get_updated_api_call(self):
@@ -66,7 +79,7 @@ class MageIntegrator(osv.osv_memory):
 
     def import_updated_products(self, cr, uid, job, context=None):
 	call = self.get_updated_api_call()
-	filters = self.get_update_filters()
+	filters = self.get_update_filters(job)
 	product_ids = self._get_job_data(cr, uid, job, call, filters)
 	return self.import_products(cr, uid, job, product_ids)
 
