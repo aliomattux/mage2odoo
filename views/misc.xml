@@ -9,8 +9,6 @@
                     <field name="name" />
                     <field name="mage_order_state" />
 		    <field name="odoo_order_state" />
-		    <field name="import_state" />
-		    <field name="instance" />
                 </tree>
             </field>
         </record>

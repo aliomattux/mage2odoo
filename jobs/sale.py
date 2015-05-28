@@ -3,6 +3,8 @@ from pprint import pprint as pp
 from openerp.tools.translate import _
 from datetime import datetime
 
+DEFAULT_STATUS_FILTERS = ['processing']
+
 class MageIntegrator(osv.osv_memory):
 
     _inherit = 'mage.integrator'
@@ -57,10 +59,18 @@ class MageIntegrator(osv.osv_memory):
 	if storeview.picking_policy:
 	    defaults.update({'picking_policy': storeview.picking_policy})
 
+	if not job.mage_instance.order_statuses and not storeview.allow_storeview_level_statuses:
+	    statuses = DEFAULT_STATUS_FILTERS
+	elif storeview.allow_storeview_level_statuses and storeview.order_statuses:
+	    statuses = [s.mage_order_state for s in storeview.order_statuses]
+	else:
+	    statuses = [s.mage_order_state for s in job.mage_instance.order_statuses]
+
 	filters = {
 		'store_id': {'=':storeview.external_id},
-		'status': {'in': ['pending', 'processing']}
+		'status': {'in': statuses}
 	}
+
 
 	if start_time:
 	    filters.update({'created_at': {'gteq': start_time}})

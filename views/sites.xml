@@ -107,12 +107,17 @@
 			    <field name="sort_order" readonly="1"/>
 			    <field name="website" readonly="1"/>
 			</group>
-			<group string="Settings" >
+			<group string="Settings" colspan="4">
 			    <field name="order_prefix" />
 			    <field name="warehouse" required="1" />
 			    <field name="picking_policy" />
 			    <field name="invoice_policy" />
 			    <field name="do_not_import" />
+			    <field name="allow_storeview_level_statuses" />
+			    <group string="Statuses" colspan="4" attrs="{'invisible': [('allow_storeview_level_statuses', '!=', True)]}">
+				<field name="order_statuses" colspan="4" nolabel="1" widget="many2many_tags">
+				</field>
+			    </group>
 			</group>
 			<group string="Schedule" >
 			    <field name="import_orders_start_datetime" />

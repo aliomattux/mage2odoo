@@ -22,9 +22,9 @@ class MageSetup(osv.osv):
                 ('picking', 'On Delivery Order'),
                 ('prepaid', 'Before Delivery')], 'Invoice Policy'
 	),
-	'order_state_mappings': fields.one2many('mage.mapping.order.state', \
-		'instance', 'Order State Mappings'
-	),
+        'order_statuses': fields.many2many('mage.mapping.order.state', 'mage_setup_import_status_rel', 'status_id', \
+                'storeview_id', 'Import Order Statuses'
+        ),
 
     }
 
@@ -166,7 +166,10 @@ class MageStoreView(osv.osv):
 	'last_import_datetime': fields.datetime('Last Imported At'),
 	'last_export_datetime': fields.datetime('Last Exported At'),
 	'order_prefix': fields.char('Order Prefix'),
-
+	'allow_storeview_level_statuses': fields.boolean('Allow storeview level status configuration'),
+	'order_statuses': fields.many2many('mage.mapping.order.state', 'mage_store_view_import_status_rel', 'status_id', \
+                'storeview_id', 'Import Order Statuses'
+	),
     }
 
     _defaults = {
@@ -192,9 +195,7 @@ class MageMappingOrderState(osv.osv):
     _name = 'mage.mapping.order.state'
     _columns = {
 	'name': fields.char('Name'),
-	'instance': fields.many2one('mage.setup', 'Magento Instance'),
 	'mage_order_state': fields.char('Magento Order State'),
-	'import_state': fields.boolean('Import Orders in this state'),
 	'odoo_order_state': fields.selection([
 		('draft', 'Draft Quotation'),
 		('sent', 'Quotation Sent'),
