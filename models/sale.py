@@ -197,6 +197,8 @@ class SaleOrder(osv.osv):
             'product_uom': 1,
         }
 
+	tax_percentage = False
+
 	if tax and total_amount:
 	    tax_percentage = round((total_amount - shipping_amount) / shipping_amount, 2) * 100
 
