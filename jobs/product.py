@@ -46,10 +46,15 @@ class MageIntegrator(osv.osv_memory):
         return filters
 
 
-    def get_all_filters(self):
-        filters = []
+    def get_all_filters(self, job):
+	statuses = ['1']
+	if job.mage_instance.import_disabled_products:
+	    statuses.append('2')
+
+	filters = [{'status': {'in': statuses}}]
 
         return filters
+
 
     def get_updated_api_call(self):
 	return 'oo_catalog_product.filtersearch'
@@ -68,7 +73,7 @@ class MageIntegrator(osv.osv_memory):
 
     def import_all_products(self, cr, uid, job, context=None):
 	call = self.get_all_api_call()
-	filters = self.get_all_filters()
+	filters = self.get_all_filters(job)
 	product_ids = self._get_job_data(cr, uid, job, call, filters)
 	return self.import_products(cr, uid, job, product_ids)
 

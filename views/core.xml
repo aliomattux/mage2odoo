@@ -39,6 +39,7 @@
 			<group string="Policy Defaults">
 			    <field name="picking_policy" />
 			    <field name="invoice_policy" />
+			    <field name="import_disabled_products" />
 			</group>
 			<group string="Shipping Defaults" >
 			    <field name="default_shipping_partner" />

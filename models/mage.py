@@ -9,6 +9,7 @@ class MageSetup(osv.osv):
 	'name': fields.char('Name', required=True),
 	'url': fields.char('URL', required=True),
 	'username': fields.char('Username', required=True),
+	'import_disabled_products': fields.boolean('Import Disabled Products'),
 	'password': fields.char('Password', required=True),
 	'default_shipping_partner': fields.many2one('res.partner', 'Default Shipping Partner'),
 	'shipping_product': fields.many2one('product.product', \
