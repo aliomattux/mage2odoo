@@ -30,13 +30,6 @@ class MageIntegrator(osv.osv_memory):
 	return True
 
 
-    def get_import_states(self, cr, uid, storeview, context=None):
-	setup = self.pool.get('mage.setup').browse(cr, uid, 1)
-	return [state.mage_order_state for state in setup.order_state_mappings
-		if state.import_state
-	]
-
-
     def import_one_storeview_orders(self, cr, uid, job, storeview, defaults, mappinglines=False, context=None):
 	start_time = False
         if not storeview.warehouse:
@@ -50,8 +43,6 @@ class MageIntegrator(osv.osv_memory):
 
 #	elif storeview.last_import_datetime:
 #	    start_time = storeview.last_import_datetime
-
-	states = self.get_import_states(cr, uid, storeview)
 
 	if storeview.invoice_policy:
 	    defaults.update({'order_policy': storeview.invoice_policy})
