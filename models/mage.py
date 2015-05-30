@@ -8,6 +8,13 @@ class MageSetup(osv.osv):
     _columns = {
 	'name': fields.char('Name', required=True),
 	'url': fields.char('URL', required=True),
+	'import_images': fields.boolean('Import Images'),
+	'import_images_method': fields.selection([
+		('standalone', 'Separately'),
+		('withproduct', 'With Products')], 'Images Import Method'),
+	'images_storage': fields.selection([
+		('database', 'Database'),
+		('filesystem', 'Filesystem (Not yet supported)')], 'Image Storage Method'),
 	'username': fields.char('Username', required=True),
 	'import_disabled_products': fields.boolean('Import Disabled Products'),
 	'password': fields.char('Password', required=True),
@@ -28,7 +35,6 @@ class MageSetup(osv.osv):
         ),
 
     }
-
 
     def create(self, cr, uid, vals, context=None):
         new_id = super(MageSetup, self).create(cr, uid, vals, context)

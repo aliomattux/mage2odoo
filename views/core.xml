@@ -45,6 +45,15 @@
 			    <field name="default_shipping_partner" />
 			    <field name="shipping_product" />
 			</group>
+			<group string="Products" >
+			    <field name="import_images" />
+			    <field name="import_images_method"
+                                attrs="{'required': [('import_images', '=', True)],
+                                        'invisible': [('import_images', '=', False)]}" />
+			    <field name="images_storage" 
+				attrs="{'required': [('import_images', '=', True)],
+					'invisible': [('import_images', '=', False)]}" />
+			</group>
                         <group string="Statuses" colspan="4">
                             <field name="order_statuses" colspan="4" nolabel="1" widget="many2many_tags">
                             </field>

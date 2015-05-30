@@ -106,13 +106,34 @@ class MageIntegrator(osv.osv_memory):
     def process_mage_products_response(self, cr, uid, job, mappinglines, records):
 #        target_obj = self.pool.get(job.mapping.model_id.model)
 	product_obj = self.pool.get('product.product')
+
+	import_images = job.mage_instance.import_images
+	if import_images:
+	    base_url = job.mage_instance.url
+	    if base_url[-1] != '/':
+		base_url += '/'
+
+	    media_ext = 'media/catalog/product'
+	    img_url = base_url + media_ext
+
         for record in records:
+	    #Solves bug with null sku
+	    if not record['sku']:
+		continue
+
 	    try:
 	        vals = product_obj.prepare_odoo_record_vals(cr, uid, job, record)
                 vals.update(self._transform_record(cr, uid, job, record, \
 			'from_mage_to_odoo', mappinglines))
-                result = product_obj.upsert_mage_record(cr, uid, vals)
+                product_id = product_obj.upsert_mage_record(cr, uid, vals)
+
+	        if import_images:
+		    product_obj.sync_one_image(cr, uid, job, product_id, record, img_url)
+
+	        cr.commit()
+
 	    except Exception, e:
+		print 'Product Sync Exception', e
 		continue
 
         return True

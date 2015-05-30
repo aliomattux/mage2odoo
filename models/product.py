@@ -2,6 +2,8 @@ from openerp.osv import osv, fields
 from magento import Product
 from pprint import pprint as pp
 from openerp.tools.translate import _
+import urllib
+import base64
 
 PRODUCT_TYPES = {
                 'simple': 'product',
@@ -168,3 +170,15 @@ class ProductProduct(osv.osv):
 
         else:
             return self.create(cr, uid, vals)
+
+
+    def sync_one_image(self, cr, uid, job, product_id, record, img_url):
+	image_path = record.get('image')
+	get_url = img_url + image_path
+
+	(filename, header) = urllib.urlretrieve(get_url)
+	with open(filename, 'rb') as f:
+	    img = base64.b64encode(f.read())
+	    self.write(cr, uid, product_id, {'image': img})
+
+	return True	
