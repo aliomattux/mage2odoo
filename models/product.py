@@ -174,8 +174,10 @@ class ProductProduct(osv.osv):
 
     def sync_one_image(self, cr, uid, job, product_id, record, img_url):
 	image_path = record.get('image')
-	get_url = img_url + image_path
+	if not image_path or image_path == 'no_selection':
+	    return True
 
+	get_url = img_url + image_path
 	(filename, header) = urllib.urlretrieve(get_url)
 	with open(filename, 'rb') as f:
 	    img = base64.b64encode(f.read())
