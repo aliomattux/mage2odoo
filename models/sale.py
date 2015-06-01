@@ -134,9 +134,8 @@ class SaleOrder(osv.osv):
 
         line_data = []
         for item in order['items']:
-            if not item['parent_item_id']:
 
-                # If its a top level product, create it
+	    if item['product_type'] == 'simple':
                 values = {
                     'name': item['name'] or item['sku'],
                     'price_unit': float(item['price']),
