@@ -67,13 +67,17 @@ class ResPartner(osv.osv):
         ):
             return False
 
-        address_data['street'] = address_data['street'].replace('\r', '\n')
-        addr_lines = address_data['street'].split('\n')
-	addr_line1 = addr_lines[0]
+	if address_data.get('street'):
+            address_data['street'] = address_data['street'].replace('\r', '\n')
+            addr_lines = address_data['street'].split('\n')
+	    addr_line1 = addr_lines[0]
 
-	if len(addr_lines) > 1:
-	    addr_line2 = addr_lines[1]
+	    if len(addr_lines) > 1:
+	        addr_line2 = addr_lines[1]
+	    else:
+	        addr_line2 = None
 	else:
+	    addr_line1 = None
 	    addr_line2 = None
 
         if not all([
@@ -107,15 +111,19 @@ class ResPartner(osv.osv):
         else:
             state_id = None
 
+	if address_data.get('street'):
+            address_data['street'] = address_data['street'].replace('\r', '\n')
+            addr_lines = address_data['street'].split('\n')
+            addr_line1 = addr_lines[0]
 
-        address_data['street'] = address_data['street'].replace('\r', '\n')
-        addr_lines = address_data['street'].split('\n')
-        addr_line1 = addr_lines[0]
+            if len(addr_lines) > 1:
+                addr_line2 = addr_lines[1]
+            else:
+                addr_line2 = None
+	else:
+	    addr_line1 = None
+	    addr_line2 = None
 
-        if len(addr_lines) > 1:
-            addr_line2 = addr_lines[1]
-        else:
-            addr_line2 = None
 	firstname = address_data['firstname']
 	lastname = address_data['lastname'] or 'no lastname'
         address_id = self.create(cr, uid, {
