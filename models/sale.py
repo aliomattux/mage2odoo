@@ -56,12 +56,16 @@ class SaleOrder(osv.osv):
                 record['billing_address'], partner,
         )
 
-        if type(record['payment']) != dict:
-	    raise osv.except_osv(_('Error!'),_(""))
+	if record.get('payment'):
+            if type(record['payment']) != dict:
+	        raise osv.except_osv(_('Error!'),_(""))
 
-        payment_method = self.get_mage_payment_method(cr, \
-                uid, record['payment']
-        )
+            payment_method = self.get_mage_payment_method(cr, \
+                    uid, record['payment']
+            )
+	else:
+	    payment_method = False
+
         vals = {
                 'mage_order_number': record['increment_id'],
 #               'order_policy':
@@ -70,13 +74,13 @@ class SaleOrder(osv.osv):
                 'order_email': record['customer_email'],
                 'partner_id': partner.id,
                 'date_order': record['created_at'],
-                'payment_method': payment_method.id,
+                'payment_method': payment_method.id if payment_method else None,
 #               'state':
 #               'pricelist_id':
-                'ip_address': record['x_forwarded_for'],
+                'ip_address': record.get('x_forwarded_for'),
 		'order_line': self.prepare_odoo_line_record_vals(cr, uid, job, record),
                 'mage_order_total': record['grand_total'],
-                'external_id': record['order_id'],
+                'external_id': record.get('order_id'),
         }
 
 	if storeview:
@@ -114,7 +118,7 @@ class SaleOrder(osv.osv):
                 )
             )
 
-        if float(record.get('discount_amount')):
+        if record.get('discount_amount'):
             vals['order_line'].append(
                 self.get_discount_line_data_using_magento_data(
                 cr, uid, record
@@ -152,8 +156,8 @@ class SaleOrder(osv.osv):
                     ).id
                 }
 
-		tax_percent = item['tax_percent']
-                if order['tax_identification'] and tax_percent and float(tax_percent) > 0.001:
+		tax_percent = item.get('tax_percent')
+                if order.get('tax_identification') and tax_percent and float(tax_percent) > 0.001:
                     taxes = self.get_mage_taxes(cr, uid, order['tax_identification'], item)
                     values['tax_id'] = [(6, 0, taxes)]
 
@@ -161,7 +165,7 @@ class SaleOrder(osv.osv):
 
             # If the product is a child product of a bundle product, do not
             # create a separate line for this.
-            if item['product_options'] and 'bundle_option' in item['product_options'] and \
+            if item.get('product_options') and 'bundle_option' in item['product_options'] and \
                     item['parent_item_id']:
                 continue
 
