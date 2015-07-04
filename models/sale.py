@@ -94,6 +94,7 @@ class SaleOrder(osv.osv):
 	    payment_method = False
 
         vals = {
+		'mage_order_status': record['state'],
                 'mage_order_number': record['increment_id'],
 #               'order_policy':
 #               'note':
