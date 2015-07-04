@@ -26,6 +26,8 @@ class MageSetup(osv.osv):
 		('one', 'Deliver all products at once')], 'Shipping Policy'
 	),
 	'pay_sale_if_paid': fields.boolean('Pay Sale in Odoo if Paid in Magento'),
+	'deliver_if_delivered': fields.boolean('Delivery automatic if Delivered in Magento'),
+	'use_order_date_as_delivery_date': fields.boolean('Use Order Date as Delivery Date'),
 	'use_invoice_date': fields.boolean('Use Invoice Date from Magento'),
 	'use_order_date': fields.boolean('Use Order Date from Magento'),
         'invoice_policy': fields.selection([

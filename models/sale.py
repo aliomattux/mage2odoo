@@ -7,12 +7,12 @@ class SaleOrder(osv.osv):
 	'mage_store': fields.many2one('mage.store.view', 'Magento Store'),
 	'order_email': fields.char('Magento Email', readonly=True),
 	'ip_address': fields.char('IP Address'),
-	'mage_order_total': fields.float('Magento Order Total', copy=False),
-	'mage_paid_total': fields.float('Magento Total Paid', copy=False, help="This is the amount pre-paid"),
-        'mage_order_status': fields.char('Magento Order Status'),
-        'mage_order_prepaid': fields.boolean('Magento Order Pre-paid'),
-        'mage_paid_date': fields.datetime('Magento Paid Date'),
-	'mage_order_number': fields.char('Magento Order Number', select=True),
+	'mage_order_total': fields.float('Magento Order Total', copy=False, readonly=True),
+	'mage_paid_total': fields.float('Magento Total Paid', help="This is the amount pre-paid", copy=False, readonly=True),
+        'mage_order_status': fields.char('Magento Order Status', copy=False, readonly=True),
+        'mage_order_prepaid': fields.boolean('Magento Order Pre-paid', copy=False, readonly=True),
+        'mage_paid_date': fields.datetime('Magento Paid Date', copy=False, readonly=True),
+	'mage_order_number': fields.char('Magento Order Number', select=True, readonly=True),
 	'mage_invoice_id': fields.integer('Magento Invoice Id', copy=False, select=True),
 	'packages': fields.one2many('stock.out.package', 'sale', 'Packages', copy=False),
 	'external_id': fields.integer('External Id', copy=False, select=True),
@@ -53,11 +53,18 @@ class SaleOrder(osv.osv):
 
         if record['total_paid'] == record['grand_total'] or \
 		record['total_due'] == '0.0000' and record['state'] == 'complete':
-
+	    vals['mage_invoice_complete'] = True
 	    vals['mage_order_prepaid'] = True
 	    #Find effective way to determine paid date
 	    vals['mage_paid_date'] = record['created_at']
 	    vals['mage_paid_total'] = record['total_paid']
+
+	#TODO: To be replaced by status mapping
+	if record['state'] in ['canceled', 'closed']:
+	    vals['state'] = 'cancel'
+
+	if record['state'] == 'complete':
+	    vals['mage_shipment_complete'] = True
 
 	return vals
 	    

@@ -51,6 +51,10 @@
 		</field>
 		<group name="payment" position="inside">
 		    <field name="mage_invoice_complete" />
+		    <field name="mage_order_prepaid" />
+		    <field name="mage_order_total" />
+		    <field name="mage_paid_total" />
+		    <field name="mage_paid_date" />
 		</group>
 		<group name="payment" position="before" >
 		    <group>
@@ -91,6 +95,11 @@
 	    <field name="arch" type="xml">
                 <field name="warehouse_id" position="after">
                     <field name="mage_store" />
+                </field>
+                <field name="order_policy" position="after">
+                    <field name="mage_order_status" />
+                    <field name="mage_order_number" />
+                    <field name="ip_address" />
                 </field>
 	    </field>
 	</record>
