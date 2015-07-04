@@ -39,6 +39,9 @@
 			<group string="Policy Defaults">
 			    <field name="picking_policy" />
 			    <field name="invoice_policy" />
+			    <field name="pay_sale_if_paid" />
+			    <field name="use_invoice_date" />
+			    <field name="use_order_date" />
 			    <field name="import_disabled_products" />
 			</group>
 			<group string="Shipping Defaults" >

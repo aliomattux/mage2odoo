@@ -8,6 +8,10 @@ class SaleOrder(osv.osv):
 	'order_email': fields.char('Magento Email', readonly=True),
 	'ip_address': fields.char('IP Address'),
 	'mage_order_total': fields.float('Magento Order Total', copy=False),
+	'mage_paid_total': fields.float('Magento Total Paid', copy=False, help="This is the amount pre-paid"),
+        'mage_order_status': fields.char('Magento Order Status'),
+        'mage_order_prepaid': fields.boolean('Magento Order Pre-paid'),
+        'mage_paid_date': fields.datetime('Magento Paid Date'),
 	'mage_order_number': fields.char('Magento Order Number', select=True),
 	'mage_invoice_id': fields.integer('Magento Invoice Id', copy=False, select=True),
 	'packages': fields.one2many('stock.out.package', 'sale', 'Packages', copy=False),
@@ -42,7 +46,23 @@ class SaleOrder(osv.osv):
 	    return carrier_obj.browse(cr, uid, carrier)
 
 
-    def prepare_odoo_record_vals(self, cr, uid, job, record, storeview=False):
+    def get_mage_payment_details(self, cr, uid, job, record, context=None):
+	vals = {
+		'mage_order_total': record['grand_total'],
+	}
+
+        if record['total_paid'] == record['grand_total'] or \
+		record['total_due'] == '0.0000' and record['state'] == 'complete':
+
+	    vals['mage_order_prepaid'] = True
+	    #Find effective way to determine paid date
+	    vals['mage_paid_date'] = record['created_at']
+	    vals['mage_paid_total'] = record['total_paid']
+
+	return vals
+	    
+
+    def prepare_odoo_record_vals(self, cr, uid, job, record, payment_defaults, storeview=False):
 	partner_obj = self.pool.get('res.partner')
 
         if record['customer_id']:
@@ -79,9 +99,13 @@ class SaleOrder(osv.osv):
 #               'pricelist_id':
                 'ip_address': record.get('x_forwarded_for'),
 		'order_line': self.prepare_odoo_line_record_vals(cr, uid, job, record),
-                'mage_order_total': record['grand_total'],
                 'external_id': record.get('order_id'),
         }
+
+
+        if payment_defaults.get('use_order_date'):
+            vals['date_order'] = record['created_at']
+            vals['create_date'] = record['created_at']
 
 	if storeview:
             if storeview.order_prefix:
@@ -95,6 +119,8 @@ class SaleOrder(osv.osv):
                          'warehouse_id': storeview.warehouse.id,
             })
 
+	#Payment and order totals
+	vals.update(self.get_mage_payment_details(cr, uid, job, record))
 
         if record['shipping_method']:
 	    shipping_record = {'code': record['shipping_method'], 

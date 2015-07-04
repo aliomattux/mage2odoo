@@ -14,7 +14,17 @@ class MageIntegrator(osv.osv_memory):
 	storeview_obj = self.pool.get('mage.store.view')
 	store_ids = storeview_obj.search(cr, uid, [('do_not_import', '=', False)])
 	mappinglines = self._get_mappinglines(cr, uid, job.mapping.id)
+	instance = job.mage_instance
+
         defaults = {}
+	payment_defaults = {}
+
+	if instance.pay_sale_if_paid:
+	    payment_defaults['auto_pay'] = True
+	if instance.use_invoice_date:
+	    payment_defaults['invoice_backdate'] = True
+	if instance.use_order_date:
+	    payment_defaults['use_order_date'] = True
 
         if job.mage_instance.invoice_policy:
             defaults.update({'order_policy': job.mage_instance.invoice_policy})
@@ -23,14 +33,14 @@ class MageIntegrator(osv.osv_memory):
             defaults.update({'picking_policy': job.mage_instance.picking_policy})
 
 	for storeview in storeview_obj.browse(cr, uid, store_ids):
-	    self.import_one_storeview_orders(cr, uid, job, storeview, defaults, mappinglines)
+	    self.import_one_storeview_orders(cr, uid, job, storeview, payment_defaults, defaults, mappinglines)
 	    storeview_obj.write(cr, uid, storeview.id, {'last_import_datetime': datetime.utcnow()})
 	    cr.commit()
 
 	return True
 
 
-    def import_one_storeview_orders(self, cr, uid, job, storeview, defaults, mappinglines=False, context=None):
+    def import_one_storeview_orders(self, cr, uid, job, storeview, payment_defaults, defaults, mappinglines=False, context=None):
 	start_time = False
         if not storeview.warehouse:
             raise osv.except_osv(_('Config Error'), _('Storeview %s has no warehouse. You must assign a warehouse in order to import orders')%storeview.name)
@@ -73,6 +83,7 @@ class MageIntegrator(osv.osv_memory):
 	    return True
 
 	order_ids = [x['increment_id'] for x in order_data]
+
 	datas = [order_ids[i:i+300] for i in range(0, len(order_ids), 300)]
 	for dataset in datas:
 	    try:
@@ -85,6 +96,9 @@ class MageIntegrator(osv.osv_memory):
 	        continue
 
 	    for order in orders:
+		#TODO: Add proper logging and debugging
+#		pp(order)
+
 	        order_obj = self.pool.get('sale.order')
 	        order_ids = order_obj.search(cr, uid, [('external_id', '=', order['order_id'])])
 	        if order_ids:
@@ -93,7 +107,7 @@ class MageIntegrator(osv.osv_memory):
 		    continue
 
 	        try:
-	            sale_order = self.process_one_order(cr, uid, job, order, storeview, defaults, mappinglines)
+	            sale_order = self.process_one_order(cr, uid, job, order, storeview, payment_defaults, defaults, mappinglines)
 		    #Implement something to auto approve if configured
 #		    sale_order.action_button_confirm()
 
@@ -115,11 +129,11 @@ class MageIntegrator(osv.osv_memory):
 	return True
 
 
-    def process_one_order(self, cr, uid, job, order, storeview, defaults=False, mappinglines=False):
+    def process_one_order(self, cr, uid, job, order, storeview, payment_defaults, defaults=False, mappinglines=False):
 	order_obj = self.pool.get('sale.order')
 	partner_obj = self.pool.get('res.partner')
 
-	vals = order_obj.prepare_odoo_record_vals(cr, uid, job, order, storeview)
+	vals = order_obj.prepare_odoo_record_vals(cr, uid, job, order, payment_defaults, storeview)
 
 	if defaults:
 	    vals.update(defaults)
@@ -127,9 +141,9 @@ class MageIntegrator(osv.osv_memory):
 	if mappinglines:
             vals.update(self._transform_record(cr, uid, job, order, 'from_mage_to_odoo', mappinglines))
 
-	order = order_obj.create(cr, uid, vals)
 
-        return order_obj.browse(cr, uid, order)
+	sale_order = order_obj.create(cr, uid, vals)
+        return order_obj.browse(cr, uid, sale_order)
 
 
     def set_one_order_status(self, cr, uid, job, order, status, message, context=None):

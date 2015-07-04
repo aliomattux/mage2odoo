@@ -25,6 +25,9 @@ class MageSetup(osv.osv):
 		('direct', 'Deliver each product when available'),
 		('one', 'Deliver all products at once')], 'Shipping Policy'
 	),
+	'pay_sale_if_paid': fields.boolean('Pay Sale in Odoo if Paid in Magento'),
+	'use_invoice_date': fields.boolean('Use Invoice Date from Magento'),
+	'use_order_date': fields.boolean('Use Order Date from Magento'),
         'invoice_policy': fields.selection([
                 ('manual', 'On Demand'),
                 ('picking', 'On Delivery Order'),
