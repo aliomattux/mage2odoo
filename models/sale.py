@@ -46,7 +46,7 @@ class SaleOrder(osv.osv):
 	    return carrier_obj.browse(cr, uid, carrier)
 
 
-    def get_mage_payment_details(self, cr, uid, job, record, context=None):
+    def get_mage_payment_details(self, cr, uid, job, record, payment_defaults, context=None):
 	vals = {
 		'mage_order_total': record['grand_total'],
 	}
@@ -58,6 +58,11 @@ class SaleOrder(osv.osv):
 	    #Find effective way to determine paid date
 	    vals['mage_paid_date'] = record['created_at']
 	    vals['mage_paid_total'] = record['total_paid']
+
+	    #This is implemented to avoid having to create an invoice from picking
+	    #Automatically. This could have unpredictable behavior
+	    if payment_defaults.get('auto_pay'):
+		vals['order_policy'] == 'prepaid'
 
 	#TODO: To be replaced by status mapping
 	if record['state'] in ['canceled', 'closed']:
@@ -128,7 +133,7 @@ class SaleOrder(osv.osv):
             })
 
 	#Payment and order totals
-	vals.update(self.get_mage_payment_details(cr, uid, job, record))
+	vals.update(self.get_mage_payment_details(cr, uid, job, record, payment_defaults))
 
         if record['shipping_method']:
 	    shipping_record = {'code': record['shipping_method'], 
