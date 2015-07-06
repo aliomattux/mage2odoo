@@ -50,7 +50,6 @@ class SaleOrder(osv.osv):
 	vals = {
 		'mage_order_total': record['grand_total'],
 	}
-
         if record['total_paid'] == record['grand_total'] or \
 		record['total_due'] == '0.0000' and record['state'] == 'complete':
 	    vals['mage_invoice_complete'] = True
@@ -62,7 +61,7 @@ class SaleOrder(osv.osv):
 	    #This is implemented to avoid having to create an invoice from picking
 	    #Automatically. This could have unpredictable behavior
 	    if payment_defaults.get('auto_pay'):
-		vals['order_policy'] == 'prepaid'
+		vals['order_policy'] = 'prepaid'
 
 	#TODO: To be replaced by status mapping
 	if record['state'] in ['canceled', 'closed']:
@@ -74,7 +73,10 @@ class SaleOrder(osv.osv):
 	return vals
 	    
 
-    def prepare_odoo_record_vals(self, cr, uid, job, record, payment_defaults, storeview=False):
+    def prepare_odoo_record_vals(self, cr, uid, job, record, payment_defaults, \
+		defaults, storeview=False
+	):
+	    
 	partner_obj = self.pool.get('res.partner')
 
         if record['customer_id']:
@@ -98,6 +100,14 @@ class SaleOrder(osv.osv):
 	else:
 	    payment_method = False
 
+
+	if record.get('tax_identification'):
+	    rates = self.get_order_tax_rates(cr, uid, record['tax_identification'])
+	    if not rates:
+		raise
+	else:
+	    rates = False
+
         vals = {
 		'mage_order_status': record['state'],
                 'mage_order_number': record['increment_id'],
@@ -111,10 +121,12 @@ class SaleOrder(osv.osv):
 #               'state':
 #               'pricelist_id':
                 'ip_address': record.get('x_forwarded_for'),
-		'order_line': self.prepare_odoo_line_record_vals(cr, uid, job, record),
+		'order_line': self.prepare_odoo_line_record_vals(cr, uid, job, record, rates),
                 'external_id': record.get('order_id'),
         }
 
+	if defaults:
+	    vals.update(defaults)
 
         if payment_defaults.get('use_order_date'):
             vals['date_order'] = record['created_at']
@@ -153,7 +165,7 @@ class SaleOrder(osv.osv):
         if float(record.get('shipping_amount')):
             vals['order_line'].append(
                 self.get_shipping_line_data_using_magento_data(
-                cr, uid, record
+                cr, uid, record, rates
                 )
             )
 
@@ -167,7 +179,7 @@ class SaleOrder(osv.osv):
 
 
     def prepare_odoo_line_record_vals(
-        self, cr, uid, job, order, context=None
+        self, cr, uid, job, order, rates, context=None
     ):
         """Make data for an item line from the magento data.
         This method decides the actions to be taken on different product types
@@ -195,8 +207,8 @@ class SaleOrder(osv.osv):
                 }
 
 		tax_percent = item.get('tax_percent')
-                if order.get('tax_identification') and tax_percent and float(tax_percent) > 0.001:
-                    taxes = self.get_mage_taxes(cr, uid, order['tax_identification'], item)
+                if rates and tax_percent and float(tax_percent) > 0.001:
+                    taxes = self.get_mage_taxes(cr, uid, rates, item)
                     values['tax_id'] = [(6, 0, taxes)]
 
                 line_data.append((0, 0, values))
@@ -211,7 +223,7 @@ class SaleOrder(osv.osv):
 
 
     def get_shipping_line_data_using_magento_data(
-        self, cr, uid, order, context=False
+        self, cr, uid, order, rates, context=False
     ):
         """
         Create a shipping line for the given sale using magento data
@@ -244,8 +256,8 @@ class SaleOrder(osv.osv):
 	if tax and total_amount:
 	    tax_percentage = round((float(total_amount)- shipping_amount) / shipping_amount, 2) * 100
 
-        if order['tax_identification'] and tax_percentage and float(tax_percentage) > 0.001:
-            taxes = self.get_mage_taxes(cr, uid, order['tax_identification'], item_data={'tax_percent': tax_percentage})
+        if rates and tax_percentage and float(tax_percentage) > 0.001:
+            taxes = self.get_mage_taxes(cr, uid, rates, item_data={'tax_percent': tax_percentage})
             vals['tax_id'] = [(6, 0, taxes)]
 
         return (0, 0, vals)
@@ -257,10 +269,6 @@ class SaleOrder(osv.osv):
         """
         Create a discount line for the given sale using magento data
 
-        :param cursor: Database cursor
-        :param user: ID of current user
-        :param order_data: Order Data from magento
-        :param context: Application context
         """
 	if order['discount_description']:
 	    description = order['discount_description']
@@ -278,37 +286,56 @@ class SaleOrder(osv.osv):
         })
 
 
+    def get_order_tax_rates(self, cr, uid, taxes):
+        rates = []
+        all_rates = []
+        for tax in taxes:
+	    all_rates.append(float(tax['percent']))
+            rates.append({'code': tax['id'],
+                        'title': tax['id'],
+                        'percent': float(tax['percent'])
+            })
+        return {'rates': rates, 'all': round(sum(all_rates), 2)}
 
 
     def get_mage_taxes(self, cr, uid, taxes, item_data, context=None):
         """Match the tax in openerp with the tax rate from magento
         Use this tax on sale line
         """
+	tax_amount = float(item_data['tax_percent'])
         tax_obj = self.pool.get('account.tax')
-        # Magento does not return the name of tax
-        # First try matching with the percent
-        tax_amount = item_data['tax_percent']
-        for tax in taxes:
-            for rate in tax['rates']:
-                if float(rate['percent']) == float(tax_amount):
-                    tax_name = rate['title']
-                    tax_code = rate['code']
+	all_tax = False
+	order_tax_ids = []
+	test_rates = []
+	if taxes['all'] == round(tax_amount, 2):
+	    all_tax = True
 
-        tax_ids = tax_obj.search(cr, uid, [
-        ('name', '=', tax_name),
-        ])
+	for tax in taxes['rates']:
 
-        if not tax_ids:
-            vals = {
-                    'amount': float(item_data['tax_percent']) / 100,
-                    'mage_tax': True,
-                    'name': tax_name,
-                    'description': tax_code,
-            }
+	    if not all_tax and tax['percent'] != item_data['tax_percent']:
+		continue
 
-            tax = tax_obj.create(cr, uid, vals)
-            tax_ids = [tax]
+            tax_name = tax['title']
+            tax_code = tax['code']
+            tax_ids = tax_obj.search(cr, uid, [
+		('name', '=', tax_name),
+	    ])
 
-        # FIXME This will fail in the case of bundle products as tax comes
-        # comes with the children and not with parent
-        return tax_ids
+            if not tax_ids:
+                vals = {
+                        'amount': float(tax['percent']) / 100,
+                        'mage_tax': True,
+                        'name': tax_name,
+                        'description': tax_code,
+                }
+
+                tax_id = tax_obj.create(cr, uid, vals)
+
+	    else:
+		 tax_id = tax_ids[0]
+
+            order_tax_ids.append(tax_id)
+            # FIXME This will fail in the case of bundle products as tax comes
+            # comes with the children and not with parent
+
+        return order_tax_ids

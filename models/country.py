@@ -17,7 +17,7 @@ class ResCountry(osv.osv):
         :return: Browse record of country if found else raises error
         """
         country_ids = self.search(
-            cursor, user, [('code', '=', code)], context=context
+            cursor, user, [('code', '=', code.upper())], context=context
         )
 
         if not country_ids:
