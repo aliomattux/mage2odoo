@@ -83,7 +83,6 @@ class MageIntegrator(osv.osv_memory):
 	    return True
 
 	order_ids = [x['increment_id'] for x in order_data]
-
 	datas = [order_ids[i:i+300] for i in range(0, len(order_ids), 300)]
 	for dataset in datas:
 	    try:
@@ -97,8 +96,6 @@ class MageIntegrator(osv.osv_memory):
 
 	    for order in orders:
 		#TODO: Add proper logging and debugging
-#		pp(order)
-
 	        order_obj = self.pool.get('sale.order')
 	        order_ids = order_obj.search(cr, uid, [('external_id', '=', order['order_id'])])
 	        if order_ids:
@@ -133,14 +130,10 @@ class MageIntegrator(osv.osv_memory):
 	order_obj = self.pool.get('sale.order')
 	partner_obj = self.pool.get('res.partner')
 
-	vals = order_obj.prepare_odoo_record_vals(cr, uid, job, order, payment_defaults, storeview)
-
-	if defaults:
-	    vals.update(defaults)
+	vals = order_obj.prepare_odoo_record_vals(cr, uid, job, order, payment_defaults, defaults, storeview)
 
 	if mappinglines:
             vals.update(self._transform_record(cr, uid, job, order, 'from_mage_to_odoo', mappinglines))
-
 
 	sale_order = order_obj.create(cr, uid, vals)
         return order_obj.browse(cr, uid, sale_order)
