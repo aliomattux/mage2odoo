@@ -29,11 +29,18 @@ class ResPartner(osv.osv):
 	    vals = {
 		    'firstname': firstname,
 		    'lastname': lastname,
+		    'is_company': False,
 		    'name': firstname + ' ' + lastname,
 		    'email': record['customer_email'],
 		    'external_id': record['customer_id'],
 
 	    }
+
+	    #If there is a company in the parent record use that instead as this is a company
+	    if record['company']:
+		vals['is_company'] = True
+		vals['name'] = record['company']
+
 	    partner = self.create(cr, uid, vals)
 
 	    return self.browse(cr, uid, partner)
