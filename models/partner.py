@@ -37,7 +37,7 @@ class ResPartner(osv.osv):
 	    }
 
 	    #If there is a company in the parent record use that instead as this is a company
-	    if record['company']:
+	    if record.get('company'):
 		vals['is_company'] = True
 		vals['name'] = record['company']
 
