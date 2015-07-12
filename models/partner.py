@@ -37,9 +37,9 @@ class ResPartner(osv.osv):
 	    }
 
 	    #If there is a company in the parent record use that instead as this is a company
-	    if record.get('company'):
+	    if record.get('billing_address') and record['billing_address'].get('company'):
 		vals['is_company'] = True
-		vals['name'] = record['company']
+		vals['name'] = record['billing_address']['company']
 
 	    partner = self.create(cr, uid, vals)
 
