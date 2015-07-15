@@ -50,6 +50,7 @@ class MageIntegrator(osv.osv_memory):
 #		storeview.last_import_datetime:
 
 	start_time = storeview.import_orders_start_datetime
+	end_time = storeview.import_orders_end_datetime
 
 #	elif storeview.last_import_datetime:
 #	    start_time = storeview.last_import_datetime
@@ -76,8 +77,17 @@ class MageIntegrator(osv.osv_memory):
 	if start_time:
 	    filters.update({'created_at': {'gteq': start_time}})
 
+	if end_time:
+	    dict = {'lteq': end_time}
+	    if filters.get('created_at'):
+	        filters['created_at'].update(dict)
+
+	    else:
+		filters.update({'created_at': dict})
+
 	#Make the external call and get the order ids
-	order_data = self._get_job_data(cr, uid, job, 'sales_order.list', [filters])
+	#Calling info is really inefficient because it loads data we dont need
+	order_data = self._get_job_data(cr, uid, job, 'sales_order.search', [filters])
 
 	if not order_data:
 	    return True
