@@ -85,18 +85,22 @@ class MageIntegrator(osv.osv_memory):
 
 
     def import_all_products(self, cr, uid, job, context=None):
+       if job.mage_instance.import_links_with_products:
+           link = True
+       else:
+           link = False
 	call = self.get_all_api_call()
 	filters = self.get_all_filters(job)
 	product_ids = self._get_job_data(cr, uid, job, call, filters)
-	return self.import_products(cr, uid, job, product_ids)
+	return self.import_products(cr, uid, job, product_ids, link)
 
 
-    def import_products(self, cr, uid, job, product_ids, context=None):
+    def import_products(self, cr, uid, job, product_ids, link, context=None):
 	datas = [product_ids[i:i+900] for i in range(0, len(product_ids), 900)]
         mappinglines = self._get_mappinglines(cr, uid, job.mapping.id)
 
 	for data in datas:
-            records = self._get_job_data(cr, uid, job, 'oo_catalog_product.multinfo', [data])
+            records = self._get_job_data(cr, uid, job, 'oo_catalog_product.multinfo', [data, link])
             self.process_mage_products_response(cr, uid, job, mappinglines, records)
 	    cr.commit()
 
