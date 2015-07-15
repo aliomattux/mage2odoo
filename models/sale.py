@@ -190,7 +190,7 @@ class SaleOrder(osv.osv):
         line_data = []
         for item in order['items']:
 
-	    if item['product_type'] == 'simple':
+	    if item['product_type'] == 'simple' or not item['product_type']:
                 values = {
                     'name': item['name'] or item['sku'],
                     'price_unit': float(item['price']),
