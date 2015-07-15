@@ -31,7 +31,6 @@ class MageIntegrator(osv.osv_memory):
 	        vals = {'associated_products': [(6, 0, product_ids)]}
 
 	    result = product_obj.upsert_mage_record(cr, uid, vals, product_id)
-	    print 'RESULT', result
 
 	return True
 
@@ -134,6 +133,7 @@ class MageIntegrator(osv.osv_memory):
 	        if import_images:
 		    product_obj.sync_one_image(cr, uid, job, product_id, record, img_url)
 
+	        print 'Successfully synced product with SKU: %s' % record['sku']
 	        cr.commit()
 
 	    except Exception, e:
