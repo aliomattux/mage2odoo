@@ -84,10 +84,10 @@ class MageIntegrator(osv.osv_memory):
 
 
     def import_all_products(self, cr, uid, job, context=None):
-       if job.mage_instance.import_links_with_products:
-           link = True
-       else:
-           link = False
+        if job.mage_instance.import_links_with_products:
+            link = True
+        else:
+            link = False
 	call = self.get_all_api_call()
 	filters = self.get_all_filters(job)
 	product_ids = self._get_job_data(cr, uid, job, call, filters)
