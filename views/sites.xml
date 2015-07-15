@@ -121,6 +121,7 @@
 			</group>
 			<group string="Schedule" >
 			    <field name="import_orders_start_datetime" />
+			    <field name="import_orders_end_datetime" />
 			    <field name="last_import_datetime" />
 			    <field name="last_export_datetime" />
 			</group>
