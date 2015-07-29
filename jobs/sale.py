@@ -79,21 +79,41 @@ class MageIntegrator(osv.osv_memory):
 
 	if end_time:
 	    dict = {'lteq': end_time}
-	    if filters.get('created_at'):
-	        filters['created_at'].update(dict)
-
-	    else:
-		filters.update({'created_at': dict})
-
+	    filters.update({'CREATED_AT': dict})
 	#Make the external call and get the order ids
 	#Calling info is really inefficient because it loads data we dont need
 	order_data = self._get_job_data(cr, uid, job, 'sales_order.search', [filters])
 
 	if not order_data:
+	    print 'No Data'
 	    return True
 
+	#The following code needs a proper implementation,
+	#However this code will be very fast in excluding unnecessary orders
+	#and do a good job of pre-filtering
+
+	order_basket = []
 	order_ids = [x['increment_id'] for x in order_data]
-	datas = [order_ids[i:i+300] for i in range(0, len(order_ids), 300)]
+
+	for id in order_ids:
+	    new_val = "('" + id + "')"
+	    order_basket.append(new_val)
+
+	val_string = ','.join(order_basket)
+
+	query = """WITH increments AS (VALUES %s) \
+		SELECT column1 FROM increments \
+		LEFT OUTER JOIN sale_order ON \
+		(increments.column1 = sale_order.mage_order_number) \
+		WHERE sale_order.mage_order_number IS NULL""" % val_string
+	cr.execute(query)
+
+	res = cr.fetchall()
+	increment_ids = [z[0] for z in res]
+	increment_ids.sort()
+	increment_ids = order_ids
+	datas = [increment_ids[i:i+300] for i in range(0, len(increment_ids), 300)]
+
 	for dataset in datas:
 	    try:
 	        orders = self._get_job_data(cr, uid, job, 'sales_order.multiload', [dataset])
@@ -107,7 +127,7 @@ class MageIntegrator(osv.osv_memory):
 	    for order in orders:
 		#TODO: Add proper logging and debugging
 	        order_obj = self.pool.get('sale.order')
-	        order_ids = order_obj.search(cr, uid, [('external_id', '=', order['order_id'])])
+	        order_ids = order_obj.search(cr, uid, [('mage_order_number', '=', order['increment_id'])])
 	        if order_ids:
 		    status = self.set_one_order_status(cr, uid, job, order, 'imported', 'Order Imported')
 		    print 'Skipping existing order %s' % order['increment_id']
