@@ -1,5 +1,5 @@
 from openerp.osv import osv, fields
-
+from pprint import pprint as pp
 
 class ResPartner(osv.osv):
     _inherit = 'res.partner'
@@ -11,6 +11,37 @@ class ResPartner(osv.osv):
 
 
     def get_or_create_customer(self, cr, uid, record, context=None):
+
+        partner_ids = self.search(cr, uid, [('external_id', '=', \
+            record['entity_id'])], limit=1)
+
+	if partner_ids:
+	    return self.browse(cr, uid, partner_ids[0])
+
+	else:
+	    firstname = record['firstname']
+	    lastname = record['lastname'] or 'no lastname'
+	    vals = {
+		    'firstname': firstname,
+		    'lastname': lastname,
+		    'is_company': False,
+		    'name': firstname + ' ' + lastname,
+		    'email': record['email'],
+		    'external_id': record['entity_id'],
+
+	    }
+
+	    #If there is a company in the parent record use that instead as this is a company
+	    if record.get('addresses') and record['addresses'][0].get('company'):
+		vals['is_company'] = True
+		vals['name'] = record['addresses'][0]['company']
+
+	    partner = self.create(cr, uid, vals)
+
+	    return self.browse(cr, uid, partner)
+
+
+    def get_or_create_order_customer(self, cr, uid, record, context=None):
 
 	if record['customer_id'] == '0' or record.get('customer_is_guest') \
 		and record.get('customer_is_guest') == '1':
@@ -49,56 +80,91 @@ class ResPartner(osv.osv):
     def get_or_create_partner_address(self, cr, uid, address_data, \
 		partner, context=None):
 
-	if self.match_mage_address(cr, uid, partner, address_data):
-	    return partner
-
+	if not partner.child_ids:
+	    return self.create_mage_partner_address(cr, uid, address_data, partner, context)
+	
 	for address in partner.child_ids:
 	    if self.match_mage_address(
 		cr, uid, address, address_data
 	    ):
-	        break
-	else:
-	    address = self.create_mage_partner_address(
-		cr, uid, address_data, partner, context
-	    )
+	        return address
 
-	return address
+        else:
+            return self.create_mage_partner_address(
+                cr, uid, address_data, partner, context
+            )
+
+
+    def parse_customer_address(self, cr, uid, address_data):
+	#Build a dictionary of prepared address values
+	#Also include an address object with no spaces for matching
+	#an existing record
+	vals = {}
+        if address_data.get('street'):
+            address_data['street'] = address_data['street'].replace('\r', '\n')
+            addr_lines = address_data['street'].split('\n')
+            addr_line1 = addr_lines[0]
+            if len(addr_lines) > 1:
+                addr_line2 = addr_lines[1].replace(' ', '') if addr_lines[1] else None
+            else:
+                addr_line2 = None
+        else:
+            addr_line1 = None
+            addr_line2 = None
+
+	vals = {
+		'addr_1': addr_line1,
+		'addr_1_match':addr_line1.replace(' ', '').lower() if addr_line1 else addr_line1,
+                'addr_2': addr_line2,
+                'addr_2_match': addr_line2.replace(' ', '').lower() if addr_line2 else addr_line2,
+		'zip': address_data['postcode'],
+		'zip_match': address_data['postcode'].replace(' ', '').lower() if address_data['postcode'] else address_data['postcode'],
+		'city': address_data['city'],
+		'city_match': address_data['city'].replace(' ', '').lower() if address_data['city'] else address_data['city'],
+	}
+
+	return vals
+
+
+    def parse_odoo_address(self, cr, uid, address):
+	street = address.street or None
+	street2 = address.street2 or None
+	zip = address.zip or None
+	city = address.city or None
+
+	vals = {
+		'address': street.replace(' ', '').lower() if street else street,
+		'address2': street2.replace(' ', '').lower() if street2 else street2,
+		'zip': zip.replace(' ', '').lower() if zip else zip,
+		'city': city.replace(' ', '').lower() if city else city,
+	}
+
+	return vals
 
 
     def match_mage_address(self, cr, uid, address, address_data):
         # Check if the name matches
 	firstname = address_data['firstname']
-	lastname = address_data['lastname'] or 'no lastname'
-        if address.name != u' '.join(
-            [firstname, lastname]
-        ):
-            return False
+	lastname = address_data['lastname'] or ''
+	data_name = firstname + lastname
+	final_data_name = data_name.replace(' ', '').lower()
 
-	if address_data.get('street'):
-            address_data['street'] = address_data['street'].replace('\r', '\n')
-            addr_lines = address_data['street'].split('\n')
-	    addr_line1 = addr_lines[0]
+	addr_name = address.name
+	match_name = addr_name.replace(' ', '').lower()
 
-	    if len(addr_lines) > 1:
-	        addr_line2 = addr_lines[1]
-	    else:
-	        addr_line2 = None
-	else:
-	    addr_line1 = None
-	    addr_line2 = None
+	if match_name != final_data_name:
+	    return False
+
+	vals = self.parse_customer_address(cr, uid, address_data)
+	match = self.parse_odoo_address(cr, uid, address)
 
         if not all([
-            (address.street or None) == addr_line1,
-	    (address.street2 or None) == addr_line2,
-            (address.zip or None) == address_data['postcode'],
-            (address.city or None) == address_data['city'],
-            (address.phone or None) == address_data['telephone'],
-            (address.fax or None) == address_data['fax'],
-            (address.country_id and address.country_id.code or None) ==
-                address_data['country_id'],
-            (address.state_id and address.state_id.name or None) ==
-                address_data['region']
+            (match['address'] or None) == (vals['addr_1_match'] or None),
+	    (match['address2'] or None) == (vals['addr_2_match'] or None),
+            (match['zip'] or None) == (vals['zip_match'] or None),
+            (match['city'] or None) == (vals['city_match'] or None),
         ]):
+
             return False
 
         return True
@@ -118,18 +184,7 @@ class ResPartner(osv.osv):
         else:
             state_id = None
 
-	if address_data.get('street'):
-            address_data['street'] = address_data['street'].replace('\r', '\n')
-            addr_lines = address_data['street'].split('\n')
-            addr_line1 = addr_lines[0]
-
-            if len(addr_lines) > 1:
-                addr_line2 = addr_lines[1]
-            else:
-                addr_line2 = None
-	else:
-	    addr_line1 = None
-	    addr_line2 = None
+	vals = self.parse_customer_address(cr, uid, address_data)
 
 	firstname = address_data['firstname']
 	lastname = address_data['lastname'] or 'no lastname'
@@ -137,12 +192,12 @@ class ResPartner(osv.osv):
             'name': u' '.join(
                 [firstname, lastname]
             ),
-            'street': addr_line1,
-            'street2': addr_line2,
+            'street': vals['addr_1'],
+            'street2': vals['addr_2'],
             'state_id': state_id,
             'country_id': country.id,
-            'city': address_data['city'],
-            'zip': address_data['postcode'],
+            'city': vals['city'],
+            'zip': vals['zip'],
             'phone': address_data['telephone'],
             'fax': address_data['fax'],
             'parent_id': partner.id,
