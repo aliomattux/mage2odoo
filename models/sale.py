@@ -80,11 +80,11 @@ class SaleOrder(osv.osv):
 	partner_obj = self.pool.get('res.partner')
 
         if record['customer_id']:
-            partner = partner_obj.get_or_create_customer(cr, uid, record)
+            partner = partner_obj.get_or_create_order_customer(cr, uid, record)
 
 	else:
 	    record['customer_id'] = 0
-	    partner = partner_obj.get_or_create_customer(cr, uid, record)
+	    partner = partner_obj.get_or_create_order_customer(cr, uid, record)
 
         invoice_address = partner_obj.get_or_create_partner_address(cr, uid, \
                 record['billing_address'], partner,
