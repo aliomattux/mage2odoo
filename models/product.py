@@ -70,7 +70,29 @@ class ProductProduct(osv.osv):
     _sql_constraints = [('default_code_uniq', 'unique (default_code)', 'The SKU must be unique!')]
 
 
+    def get_or_create_special_product_vals(self, cr, uid, item, context=None):
+
+	product_ids = self.search(cr, uid, [('default_code', '=', item['sku'])])
+	if product_ids:
+	    return self.browse(cr, uid, product_ids[0])
+
+	else:
+	    vals = {
+		'name': item.get('description') or item['sku'],
+		'default_code': item['sku'],
+		'active': True,
+		'categories': [(5)],
+		'type': 'service',
+	    }
+
+	    product = self.create(cr, uid, vals)
+	    return self.browse(cr, uid, product)
+
+
     def get_or_create_odoo_record(self, cr, uid, job, external_id, item=False, context=None):
+	if external_id and int(external_id) == 0 and item:
+	    return self.get_or_create_special_product_vals(cr, uid, item)
+
         product_id = self.get_mage_record(cr, uid, external_id)
 	if not product_id and item:
 	    product_ids = self.search(cr, uid, [('default_code', '=', item['sku'])])
