@@ -5,3 +5,4 @@ import category
 import sale
 import invoice
 import package
+import partner
