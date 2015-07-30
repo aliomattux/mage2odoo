@@ -9,8 +9,13 @@ class MageIntegrator(osv.osv_memory):
 
 
     def import_all_partners(self, cr, uid, job, context=None):
+	instance = job.mage_instance
+	filters = False
+	if instance.last_imported_customer:
+	    filters = {'entity_id': {'gt': instance.last_imported_customer}}
 
-        partner_ids = self._get_job_data(cr, uid, job, 'oo_customer.search', [])
+        partner_ids = self._get_job_data(cr, uid, job, 'oo_customer.search', [filters])
+
 	if not partner_ids:
 	    return True
 

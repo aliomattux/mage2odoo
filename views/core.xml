@@ -50,6 +50,9 @@
 			    <field name="default_shipping_partner" />
 			    <field name="shipping_product" />
 			</group>
+			<group string="Customers">
+			    <field name="last_imported_customer" />
+			</group>
 			<group string="Products" >
 			    <field name="import_images" />
 			    <field name="import_images_method"
