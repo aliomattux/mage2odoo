@@ -11,18 +11,39 @@ class MageIntegrator(osv.osv_memory):
         self.import_store_groups(cr, uid, job)
         self.import_store_views(cr, uid, job)
         self.sync_mage_carriers(cr, uid, job)
+	self.sync_all_taxes(cr, uid, job)
         self.sync_instance_order_statuses(cr, uid, job)
         return True
 
 
     def sync_mage_carriers(self, cr, uid, job, context=None):
-        records = self._get_job_data(cr, uid, job, 'sales_order.shipping_methods', [])
+	records = self._get_job_data(cr, uid, job, 'sales_order.shipping_methods', [])
         carrier_obj = self.pool.get('delivery.carrier')
 
         for record in records:
-	    vals = carrier_obj.prepare_odoo_record_vals(cr, uid, job, record)
-	    carrier = carrier_obj.upsert_mage_record(cr, uid, vals)
-	    print carrier
+           vals = carrier_obj.prepare_odoo_record_vals(cr, uid, job, record)
+           carrier = carrier_obj.upsert_mage_record(cr, uid, vals)
+           print carrier
+
+	return True
+
+
+    def sync_all_taxes(self, cr, uid, job, context=None):
+        records = self._get_job_data(cr, uid, job, 'sales_order.taxes_info', [])
+        tax_obj = self.pool.get('account.tax')
+
+        for tax in records:
+	    print tax
+	    tax_ids = tax_obj.search(cr, uid, [('name', '=', tax['code'])])
+	    if tax_ids:
+		continue
+	    else:
+		vals = {'name': tax['code'],
+			'amount': float(tax['rate']) / 100,
+			'mage_tax': True,
+			'description': tax['code'],
+		}
+		tax_id = tax_obj.create(cr, uid, vals)
 
 	return True
 
