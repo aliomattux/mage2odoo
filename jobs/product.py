@@ -95,6 +95,9 @@ class MageIntegrator(osv.osv_memory):
 	call = self.get_all_api_call()
 	filters = self.get_all_filters(job)
 	product_ids = self._get_job_data(cr, uid, job, call, filters)
+	if not product_ids:
+	    return True
+
 	return self.import_products(cr, uid, job, product_ids, link)
 
 
