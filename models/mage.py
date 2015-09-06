@@ -31,6 +31,8 @@ class MageSetup(osv.osv):
 	'use_order_date_as_delivery_date': fields.boolean('Use Order Date as Delivery Date'),
 	'use_invoice_date': fields.boolean('Use Invoice Date from Magento'),
 	'use_order_date': fields.boolean('Use Order Date from Magento'),
+	'default_product_tax': fields.many2one('account.tax', 'Default Tax', help="If this box is checked, tax will be applied to all products"),
+	'nontaxable_tax_class_id': fields.char('Nontaxable Class Id', help="This field can be used to not apply tax even with default tax applied"),
         'invoice_policy': fields.selection([
                 ('manual', 'On Demand'),
                 ('picking', 'On Delivery Order'),

@@ -7,6 +7,8 @@ class SaleOrder(osv.osv):
 	'mage_store': fields.many2one('mage.store.view', 'Magento Store'),
 	'order_email': fields.char('Magento Email', readonly=True),
 	'ip_address': fields.char('IP Address'),
+	'partner_invoice_id': fields.many2one('res.partner', 'Invoice Address', readonly=True, required=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Invoice address for current sales order.", domain="[('parent_id', '=', partner_id)]"),
+        'partner_shipping_id': fields.many2one('res.partner', 'Delivery Address', readonly=True, required=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Delivery address for current sales order.", domain="[('parent_id', '=', partner_id)]"),
 	'mage_order_total': fields.float('Magento Order Total', copy=False, readonly=True),
 	'mage_paid_total': fields.float('Magento Total Paid', help="This is the amount pre-paid", copy=False, readonly=True),
         'mage_order_status': fields.char('Magento Order Status', copy=False, readonly=True),
@@ -19,6 +21,36 @@ class SaleOrder(osv.osv):
 	'mage_shipment_complete': fields.boolean('Magento Shipment Complete', readonly=True, copy=False),
 	'mage_invoice_complete': fields.boolean('Magento Billing Complete', readonly=True, copy=False),
     }
+
+    #This method just plainly override because the original is silly at best
+    def onchange_sale_partner_id(self, cr, uid, ids, partner_id, context=None):
+        if not partner_id:
+            return {'value': {'partner_invoice_id': False, 'partner_shipping_id': False,  'payment_term': False, 'fiscal_position': False}}
+
+        partner_obj = self.pool.get('res.partner')
+        partner = partner_obj.browse(cr, uid, partner_id, context=context)
+        shipping_address_id = partner_obj.get_sale_address(cr, uid, partner_id, 'delivery')
+        billing_address_id =  partner_obj.get_sale_address(cr, uid, partner_id, 'invoice')
+
+        pricelist = partner.property_product_pricelist and partner.property_product_pricelist.id or False
+        invoice_part = partner_obj.browse(cr, uid, billing_address_id, context=context)
+        payment_term = invoice_part.property_payment_term and invoice_part.property_payment_term.id or False
+        dedicated_salesman = partner.user_id and partner.user_id.id or uid
+        val = {
+            'partner_invoice_id': billing_address_id,
+            'partner_shipping_id': shipping_address_id,
+            'payment_term': payment_term,
+            'user_id': dedicated_salesman,
+        }
+        delivery_onchange = self.onchange_delivery_id(cr, uid, ids, False, partner_id, shipping_address_id, False,  context=context)
+        val.update(delivery_onchange['value'])
+        if pricelist:
+            val['pricelist_id'] = pricelist
+        if not self._get_default_section_id(cr, uid, context=context) and partner.section_id:
+            val['section_id'] = partner.section_id.id
+        sale_note = self.get_salenote(cr, uid, ids, partner.id, context=context)
+        if sale_note: val.update({'note': sale_note})
+        return {'value': val}
 
 
     def get_mage_payment_method(self, cr, uid, payment, context=None):
@@ -87,7 +119,7 @@ class SaleOrder(osv.osv):
 	    partner = partner_obj.get_or_create_order_customer(cr, uid, record)
 
         invoice_address = partner_obj.get_or_create_partner_address(cr, uid, \
-                record['billing_address'], partner,
+                record['billing_address'], partner, 'invoice'
         )
 
 	if record.get('payment'):
@@ -158,7 +190,7 @@ class SaleOrder(osv.osv):
 
         if record.get('shipping_address'):
             shipping_address = partner_obj.get_or_create_partner_address(cr, uid, \
-                    record['shipping_address'], partner,
+                    record['shipping_address'], partner, 'delivery'
             )
             vals.update({'partner_shipping_id': shipping_address.id})
 

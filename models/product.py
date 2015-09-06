@@ -18,8 +18,11 @@ class ProductTemplate(osv.osv):
     _inherit = 'product.template'
 
     _columns = {
+	'shipping_product': fields.boolean('Shipping Product', help="Used to create totals like Magento"),
 	'set': fields.many2one('product.attribute.set', 'Attribute Set'),
 	'short_description': fields.text('Short Descripton'),
+	'img_path': fields.char('Image Path'),
+	'url_path': fields.char('URL Path'),
 	'categories': fields.many2many('product.category', 'mage_product_categories_rel', \
 		'product_id', 'category_id', 'Categories'
 	),
@@ -104,6 +107,20 @@ class ProductProduct(osv.osv):
 
 	return self.browse(cr, uid, product_id)
 
+    def apply_taxes(self, cr, uid, job, record, context=None):
+	instance = job.mage_instance
+	if instance.default_product_tax:
+	    product_tax_class = record.get('tax_class_id')
+	    if not product_tax_class:
+		return [(6, 0, [])]
+
+	    if instance.nontaxable_tax_class_id and instance.nontaxable_tax_class_id == str(product_tax_class):
+		return [(6, 0, [])]
+
+	    return [(6, 0, [instance.default_product_tax.id])]
+	else:
+	    return [(6, 0, [])]
+
 
     def prepare_odoo_record_vals(self, cr, uid, job, record, context=None):
 	set_obj = self.pool.get('product.attribute.set')
@@ -124,6 +141,8 @@ class ProductProduct(osv.osv):
                 'type': PRODUCT_TYPES.get(record['type_id']) or 'product',
                 'sync_to_mage': True,
         }
+
+	vals['taxes_id'] = self.apply_taxes(cr, uid, job, record)
 
         if record.get('categories'):
             vals['categories'] = self._find_categories(cr, uid, record['categories']),
@@ -203,6 +222,6 @@ class ProductProduct(osv.osv):
 	(filename, header) = urllib.urlretrieve(get_url)
 	with open(filename, 'rb') as f:
 	    img = base64.b64encode(f.read())
-	    self.write(cr, uid, product_id, {'image': img})
+	    self.write(cr, uid, product_id, {'image': img, 'img_path': get_url})
 
 	return True	

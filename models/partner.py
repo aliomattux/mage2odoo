@@ -5,9 +5,53 @@ class ResPartner(osv.osv):
     _inherit = 'res.partner'
     _columns = {
 		'firstname': fields.char('Firstname'),
+		'company': fields.char('Company'),
+		'is_default_billing': fields.boolean('Is Default Billing'),
+		'is_default_shipping': fields.boolean('Is Default Shipping'),
 		'lastname': fields.char('Lastname'),
-		'external_id': fields.integer('Magento ID', copy=False, select=True),
+		'external_address_id': fields.integer('Magento Address Id', readonly=True),
+		#'address_type': fields.selection([('billing', 'Billing'), ('shipping', 'Shipping')], 'Magento Address Type'),
+		'external_id': fields.integer('Magento ID', copy=False, select=True, readonly=True),
     }
+
+
+    def get_sale_address(self, cr, uid, partner_id, type, context=None):
+	base_search = ('parent_id', '=', partner_id)
+	if type == 'invoice':
+	    preferred = 'is_default_billing'
+	elif type == 'delivery':
+	    preferred = 'is_default_shipping'
+	else:
+	    preferred = False
+
+	if preferred:
+	    preferred_ids = self.search(cr, uid, [(preferred, '=', True), ('type', '=', type), base_search])
+	    if preferred_ids:
+		return preferred_ids[0]
+
+        address_ids = self.search(cr, uid, [('type', '=', type), base_search])
+	if address_ids:
+	    return address_ids[0]
+
+	contact_ids = self.search(cr, uid, [('type', '=', 'contact'), base_search])
+	if not contact_ids:
+	    return partner_id
+
+	return contact_ids[0]
+
+
+    def sync_one_mage_customer(self, cr, uid, ids, context=None):
+	integrator_obj = self.pool.get('mage.integrator')
+	job_obj = self.pool.get('mage.job')
+	job_ids = job_obj.search(cr, uid, [('python_function_name', '=', 'import_all_partners')])
+	job = job_obj.browse(cr, uid, job_ids[0])
+
+	partner = self.browse(cr, uid, ids[0])
+	if not partner.external_id:
+	    return True
+
+	integrator_obj.import_partners(cr, uid, job, [partner.external_id])
+	return True
 
 
     def get_or_create_customer(self, cr, uid, record, context=None):
@@ -78,7 +122,7 @@ class ResPartner(osv.osv):
 
 
     def get_or_create_partner_address(self, cr, uid, address_data, \
-		partner, context=None):
+		partner, address_type, context=None):
 
 	if not partner.child_ids:
 	    return self.create_mage_partner_address(cr, uid, address_data, partner, context)
@@ -87,11 +131,14 @@ class ResPartner(osv.osv):
 	    if self.match_mage_address(
 		cr, uid, address, address_data
 	    ):
+		address.company = address_data.get('company')
+		address.type = address_type
+		address.external_address_id = address_data.get('entity_id')
 	        return address
 
         else:
             return self.create_mage_partner_address(
-                cr, uid, address_data, partner, context
+                cr, uid, address_data, partner, address_type, context
             )
 
 
@@ -170,7 +217,7 @@ class ResPartner(osv.osv):
         return True
 
 
-    def create_mage_partner_address(self, cr, uid, address_data, partner, context=None):
+    def create_mage_partner_address(self, cr, uid, address_data, partner, address_type, context=None):
         country_obj = self.pool.get('res.country')
         state_obj = self.pool.get('res.country.state')
 
@@ -192,6 +239,11 @@ class ResPartner(osv.osv):
             'name': u' '.join(
                 [firstname, lastname]
             ),
+	    'firstname': firstname,
+	    'lastname': lastname,
+	    'type': address_type,
+	    'company': address_data.get('company'),
+	    'external_address_id': address_data.get('entity_id'),
             'street': vals['addr_1'],
             'street2': vals['addr_2'],
             'state_id': state_id,
