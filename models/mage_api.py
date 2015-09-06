@@ -1,4 +1,5 @@
 from openerp.osv import osv, fields
+from openerp.tools.translate import _
 from pprint import pprint as pp
 from magento import API
 import socket
@@ -21,7 +22,7 @@ class MageIntegrator(osv.osv):
 	mage_obj = self.pool.get('mage.setup')
 	setup_ids = mage_obj.search(cr, uid, [], limit=1)
 	if setup_ids:
-	    instance = setup_ids.browse(cr, uid, setup_ids[0]
+	    instance = setup_ids.browse(cr, uid, setup_ids[0])
 	    return {
 		'url': instance.url,
 		'username': instance.username,
@@ -53,18 +54,22 @@ class MageIntegrator(osv.osv):
                 return mage_api.call(method, arguments)
 
         except (socket.gaierror, socket.error, socket.timeout) as err:
-	    print 'Network Error'
+	    raise osv.except_osv(_('Network/URL Config Error'), _('Either you entered the URL in wrong or you have no internet connectivity'))
         except xmlrpclib.ProtocolError as err:
             if err.errcode in [502,   # Bad gateway
                                503,   # Service unavailable
                                504]:  # Gateway timeout
 		raise osv.except_osv(_('Connection Error'), _('Server Returned Error Code: %s')%err.errcode)
             else:
-		raise osv.except_osv(_('Generic Connection Error'), _('Could Not Authenticate/Connect with Magento!\n
-Please verify that\n1. The Magento module is installed in the LOCAL folder on Magento.\n
-2. Your webservice user in Magento is setup with FULL Admin access.\n
-3. Verify your Odoo server can reach Magento.\n
-4. Verify that you have entered the correct Credentials'))
+		raise osv.except_osv(_('Generic Connection Error'), _("Could Not Authenticate/Connect with Magento!\n" \
+			"Please verify that\n1. The Magento module is installed in the LOCAL folder on Magento.\n" \
+			"2. Your webservice user in Magento is setup with FULL Admin access.\n" \
+			"3. Verify your Odoo server can reach Magento.\n" \
+			"4. Verify that you have entered the correct Credentials"))
+
+	except Exception, e:
+	    raise osv.except_osv(_('Magento Returned an Error'), _('%s')%e)
+
 
     def _get_product_type_selections(self, cr, uid, job, conversion_type, \
 		mappingline, record):
