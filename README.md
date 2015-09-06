@@ -1,8 +1,17 @@
-Attention!
-This is a development branch. Use at your own risk!
-These modules have not been fully tested, contain print statements, developer debugging information, etc
-It should not be considered a production module, or a release candidate.
+Mage2Odoo
+
+Turn key solution for Magento
+
+Requires Python libraries
+
+PIL
+pycountry
+magento (Do not use PIP version as it is out of date. Download directly from Github)
 
 
-This module requires an updated openlabs magento side module. In the production release, a new magento api module will be used. For development, the hybrid module will be used.
+Requires Odoo Modules
 
+payment_method
+delivery
+stock_package
+product_upc_sku
