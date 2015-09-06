@@ -77,10 +77,14 @@ class MageIntegrator(osv.osv_memory):
 
 
     def import_updated_products(self, cr, uid, job, context=None):
+        if job.mage_instance.import_links_with_products:
+            link = True
+        else:
+            link = False
 	call = self.get_updated_api_call()
 	filters = self.get_update_filters(job)
 	product_ids = self._get_job_data(cr, uid, job, call, filters)
-	return self.import_products(cr, uid, job, product_ids)
+	return self.import_products(cr, uid, job, product_ids, link)
 
 
     def import_all_products(self, cr, uid, job, context=None):
@@ -120,18 +124,24 @@ class MageIntegrator(osv.osv_memory):
 	    img_url = base_url + media_ext
 
         for record in records:
+	   # pp(record)
 	    #Solves bug with null sku
 	    if not record['sku']:
 		continue
 
 	    try:
 	        vals = product_obj.prepare_odoo_record_vals(cr, uid, job, record)
-                vals.update(self._transform_record(cr, uid, job, record, \
-			'from_mage_to_odoo', mappinglines))
+		mapper_vals = self._transform_record(cr, uid, job, record, \
+			'from_mage_to_odoo', mappinglines
+		)
+		vals.update(mapper_vals)
                 product_id = product_obj.upsert_mage_record(cr, uid, vals)
 
 	        if import_images:
-		    product_obj.sync_one_image(cr, uid, job, product_id, record, img_url)
+		    try:
+		        product_obj.sync_one_image(cr, uid, job, product_id, record, img_url)
+		    except Exception, e:
+			pass
 
 	        print 'Successfully synced product with SKU: %s' % record['sku']
 	        cr.commit()
