@@ -1,0 +1,104 @@
+<openerp>
+    <data>
+
+        <record id="mage_partner_simple_form" model="ir.ui.view">
+            <field name="name">Mage Partner Simple Form</field>
+            <field name="model">res.partner</field>
+	    <field name="inherit_id" ref="base.view_partner_simple_form" />
+            <field name="arch" type="xml">
+		<field name="function" position="before" >
+		    <field name="firstname" />
+		    <field name="lastname" />
+		    <field name="company" />
+		</field>
+		<field name="mobile" position="after">
+		    <field name="external_address_id" />
+		</field>
+	    </field>
+	</record>
+
+
+        <record id="view_mage_partner_form" model="ir.ui.view">
+            <field name="name">Mage Partner Form</field>
+            <field name="model">res.partner</field>
+	    <field name="inherit_id" ref="base.view_partner_form" />
+            <field name="arch" type="xml">
+		<label string="Address" position="replace" />
+		<field name="website" position="replace" />
+		<field name="street" position="before">
+		    <group>
+		    <field name="is_default_shipping" />
+		    <field name="is_default_billing" />
+		    <field name="firstname" />
+		    <field name="lastname" />
+		    </group>
+		</field>
+		<field name="email" position="before">
+		    <field name="company" />
+		</field>
+		<page name="internal_notes" position="after" >
+		    <page string="Magento" >
+			<group string="Actions" attrs="{'invisible': [('parent_id', '!=', False)]}">
+			    <button string="Sync Customer" name="sync_one_mage_customer" type="object" />
+			</group>
+			<group string="References">
+			    <field name="external_id" />
+			    <field name="external_address_id" />
+			</group>
+		    </page>
+		</page>
+		<!-- This entire form replaced because it is embedded inside another form -->
+		<form string="Contact" position="replace">
+                    <form string="Contact">
+                                    <sheet>
+                                        <field name="image" widget='image' class="oe_avatar oe_left" options='{"preview_image": "image_medium"}'/>
+                                        <div class="oe_title">
+                                            <label for="name" class="oe_edit_only"/>
+                                            <h1><field name="name" style="width: 70%%"/></h1>
+                                            <field name="category_id" widget="many2many_tags" placeholder="Tags..." style="width: 70%%"/>
+                                        </div>
+                    			<group>
+                    			    <field name="is_default_shipping" />
+                    			    <field name="is_default_billing" />
+					</group>
+                                        <group>
+                                            <field name="firstname" />
+                                            <field name="lastname" />
+                                            <field name="function" placeholder="e.g. Sales Director"/>
+                                            <field name="email"/>
+                                            <field name="phone"/>
+                                            <field name="mobile"/>
+                                        </group>
+                                        <div>
+                                            <field name="use_parent_address" invisible="1"/>
+                                        </div>
+                                        <group>
+                                            <label for="type"/>
+                                            <div name="div_type">
+                                                <field class="oe_inline" name="type"/>
+                                            </div>
+                                            <label for="street" string="Address" attrs="{'invisible': [('use_parent_address','=', True)]}"/>
+                                            <div attrs="{'invisible': [('use_parent_address','=', True)]}" name="div_address">
+                                                <field name="street" placeholder="Street..."/>
+                                                <field name="street2"/>
+                                                <div class="address_format">
+                                                    <field name="city" placeholder="City" style="width: 40%%"/>
+                                                    <field name="state_id" class="oe_no_button" placeholder="State" style="width: 37%%" options='{"no_open": True}' on_change="onchange_state(state_id)"/>
+                                                    <field name="zip" placeholder="ZIP" style="width: 20%%"/>
+                                                </div>
+                                                <field name="country_id" placeholder="Country" class="oe_no_button" options='{"no_open": True, "no_create": True}'/>
+                                            </div>
+                                        </group>
+					<group>
+					    <field name="external_address_id" readonly="1" />
+					</group>
+                                        <field name="supplier" invisible="True"/>
+                                        <field name="customer" invisible="True"/>
+                                    </sheet>
+                                </form>
+</form>
+	    </field>
+	</record>
+
+    </data>
+</openerp>

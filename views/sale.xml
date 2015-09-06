@@ -45,8 +45,7 @@
 		<field name="partner_invoice_id" position="replace" />
 		<field name="partner_shipping_id" position="replace" />
 		<field name="partner_id" position="replace">
-		    <field name="partner_id" on_change="onchange_partner_id(partner_id, context)" domain="[('customer','=',True)]" context="{'search_default_customer':1}" options='{"always_reload": True}'/>
-		    <field name="external_id" invisible="1" />
+		    <field name="partner_id" on_change="onchange_sale_partner_id(partner_id, context)" domain="[('parent_id', '=', False)]" context="{'search_default_customer':1}" options='{"always_reload": True}'/>
 		    <field name="order_email" />
 		</field>
 		<group name="payment" position="inside">
@@ -66,8 +65,10 @@
 			<group>
 			    <field name="partner_shipping_id" on_change="onchange_delivery_id(company_id, partner_id, partner_shipping_id, fiscal_position)" groups="sale.group_delivery_invoice_address" context="{'default_type':'delivery', 'show_address': 1}" options='{"always_reload": True}'/>
 			</group>
-			<group name="carrier" string="Delivery">
-			    <field name="mage_shipment_complete" />
+			<group name="carrier">
+			    <group name="mage_shipment" string="Delivery">
+			        <field name="mage_shipment_complete" />
+			    </group>
 			</group>
                         <group string="Delivery Orders" name="pickings">
                             <field name="picking_ids" nolabel="1" widget="one2many_list">
@@ -100,19 +101,31 @@
                     <field name="mage_order_status" />
                     <field name="mage_order_number" />
                     <field name="ip_address" />
+		    <field name="external_id" readonly="1" />
                 </field>
 	    </field>
 	</record>
+
+        <record id="mage_carrier_service_search_view" model="ir.ui.view">
+            <field name="name">Carrier Many2one Tree View</field>
+            <field name="model">delivery.carrier</field>
+            <field name="arch" type="xml">
+		<search>
+		    <field name="name" />
+		</search>
+	    </field>
+	</record>
+
 
         <record id="delivery.view_order_withcarrier_form" model="ir.ui.view">
             <field name="name">delivery.sale.order_withcarrier.form.view</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="view_mage_order_form"/>
             <field name="arch" type="xml">
-		<group name="carrier" position="inside">
+		<group name="mage_shipment" position="inside">
                         <label for="carrier_id"/>
                         <div>
-                            <field name="carrier_id" context="{'order_id':active_id or False}" class="oe_inline"/>
+                            <field name="carrier_id" context="{'order_id':active_id or False, 'tree_view_ref': 'mage_carrier_service_search_view'}" class="oe_inline" colspan="3"/>
                             <button name="delivery_set" string="Add in Quote" type="object"
                                 class="oe_edit_only"
                                 attrs="{'invisible':['|',('carrier_id','=',False),('state','not in',('draft','sent'))]}"/>

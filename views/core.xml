@@ -54,6 +54,8 @@
 			    <field name="last_imported_customer" />
 			</group>
 			<group string="Products" >
+			    <field name="default_product_tax" />
+			    <field name="nontaxable_tax_class_id" />
 			    <field name="import_images" />
 			    <field name="import_images_method"
                                 attrs="{'required': [('import_images', '=', True)],

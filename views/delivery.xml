@@ -8,6 +8,7 @@
             <field name="arch" type="xml">
                 <field name="name" position="after">
                     <field name="mage_code" />
+		    <field name="mage_carrier_code" />
                 </field>
             </field>
         </record>
@@ -18,8 +19,10 @@
             <field name="inherit_id" ref="delivery.view_delivery_carrier_form" />
             <field name="arch" type="xml">
                 <field name="product_id" position="after" >
+		    <field name="display_in_ui" />
                     <field name="mage_code" />
-		    <field name="mage_carrier" />
+		    <field name="mage_carrier" string="Deprecated"/>
+		    <field name="mage_carrier_code" />
                 </field>
             </field>
         </record>

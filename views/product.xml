@@ -69,7 +69,7 @@
 			    <tree>
 				<field name="name" />
 				<field name="default_code" />
-				<field name="list_price" />
+				<field name="list_price" widget="symbol" />
 			    </tree>
 			</field>
                     </page>
@@ -78,7 +78,10 @@
 			    <field name="set" />
 			    <field name="mage_type" />
 			    <field name="mage_tax_class" />
+			    <field name="shipping_product" />
 			    <field name="mage_manage_stock" />
+			    <field name="img_path" />
+			    <field name="url_path" />
 		        </group>
 			<group string="Stuff">
 			    <field name="visibility" />
