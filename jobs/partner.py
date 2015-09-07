@@ -65,7 +65,6 @@ class MageIntegrator(osv.osv_memory):
 
 	        if record['addresses']:
 		    for address in record['addresses']:
-			pp(address)
 		        partner_obj.get_or_create_partner_address(cr, uid, address, partner, address_type=False)
                         print 'Synced Customer Address'
 	    except Exception, e:
