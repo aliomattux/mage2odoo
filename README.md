@@ -86,6 +86,9 @@ Amasty Salesman module
 
 This module will import salesman to Odoo when assigned to a sales order in Magento
 
+https://github.com/aliomattux/mage2odoo_custom_shipping_account
+
+This module adds functionality to the sales order similar to a custom Magento module that allows you to specify a customers shipping account for FedEx/UPS
 
 Donate to our project
 ---------------------
