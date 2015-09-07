@@ -18,11 +18,11 @@ import xmlrpclib
 class MageIntegrator(osv.osv):
     _name = 'mage.integrator'
 
-    def get_external_credentials(self):
+    def get_external_credentials(self, cr, uid):
 	mage_obj = self.pool.get('mage.setup')
 	setup_ids = mage_obj.search(cr, uid, [], limit=1)
 	if setup_ids:
-	    instance = setup_ids.browse(cr, uid, setup_ids[0])
+	    instance = mage_obj.browse(cr, uid, setup_ids[0])
 	    return {
 		'url': instance.url,
 		'username': instance.username,
@@ -43,6 +43,12 @@ class MageIntegrator(osv.osv):
     def _get_job_data(self, cr, uid, job, method, arguments):
         credentials = self._get_credentials(job)
 	return self._mage_call(credentials, method, arguments)
+
+
+    def get_magento_region_id(self, cr, uid, credentials, country_id, state_name):
+        with API(credentials['url'], credentials['username'], credentials['password']) as mage_api:
+            region_id = mage_api.call('sales_order.getregionid', [country_id, state_name])
+            return region_id
 
 
     #This method copied from magentoerpconnect for v7
