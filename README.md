@@ -1,8 +1,10 @@
-Mage2Odoo
+Mage2Odoo - Turn Key Solution for Magento
 ---------
 
-Turn key solution for Magento. Tested working with Odoo 8.0 Revision 04b252b72c3bb5568f002e05d2fa889a1b4aae90
+Turn key solution for Magento. 
 -----------------------------
+
+Tested working with Odoo 8.0 Revision 04b252b72c3bb5568f002e05d2fa889a1b4aae90
 
 
 General Requirements
@@ -15,19 +17,18 @@ PIL
 
 pycountry
 
-magento (Do not use PIP version as it is out of date. Download directly from Github)
+https://github.com/aliomattux/magento
 
 
 Requires Odoo Modules
 --------------------
-payment_method
+https://github.com/aliomattux/payment_method
 
-delivery
+delivery - Odoo Module
 
-stock_package
+https://github.com/aliomattux/stock_package
 
-product_upc_sku
-
+https://github.com/aliomattux/product_sku_upc
 
 Recommended Server patches
 --------------------------
