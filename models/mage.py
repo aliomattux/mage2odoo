@@ -7,6 +7,11 @@ class MageSetup(osv.osv):
     _name = 'mage.setup'
     _columns = {
 	'name': fields.char('Name', required=True),
+	'debug_mode': fields.selection([('none', 'None'), ('error', 'Error'), ('debug', 'All')],
+	string='Debug Mode', help="None: This will not log any messages to Sentry.\n" \
+		"Error: This will send only error events to Sentry\n" \
+		"All: This will send every event, success and failure to Sentry"),
+	'sentry_dsn': fields.char('Sentry DSN', help="Exception Messages wil be sent to the logging server"),
 	'url': fields.char('URL', required=True),
 	'import_images': fields.boolean('Import Images'),
 	'import_images_method': fields.selection([
@@ -16,20 +21,21 @@ class MageSetup(osv.osv):
 		('database', 'Database'),
 		('filesystem', 'Filesystem (Not yet supported)')], 'Image Storage Method'),
 	'username': fields.char('Username', required=True),
+	'default_fiscal_position': fields.many2one('account.fiscal.position', 'Default Fiscal Position', help="This will assign a fiscal position to all orders"),
 	'import_disabled_products': fields.boolean('Import Disabled Products'),
-	'password': fields.char('Password', required=True),
-	'default_shipping_partner': fields.many2one('res.partner', 'Default Shipping Partner'),
+	'password': fields.char('Password', required=True, help="This is the API Key for Magento"),
+	'default_shipping_partner': fields.many2one('res.partner', 'Default Shipping Partner', help="This will assign a required partner to any shipping method that is created"),
 	'shipping_product': fields.many2one('product.product', \
-		'Shipping Product', domain="[('type', '=', 'service')]"),
+		'Shipping Product', domain="[('type', '=', 'service')]", help="Only service products can be used here"),
 	'picking_policy': fields.selection([
 		('direct', 'Deliver each product when available'),
 		('one', 'Deliver all products at once')], 'Shipping Policy'
 	),
-	'last_imported_customer': fields.integer('Last Imported Customer'),
-	'pay_sale_if_paid': fields.boolean('Pay Sale in Odoo if Paid in Magento'),
-	'deliver_if_delivered': fields.boolean('Delivery automatic if Delivered in Magento'),
-	'use_order_date_as_delivery_date': fields.boolean('Use Order Date as Delivery Date'),
+	'last_imported_customer': fields.integer('Last Imported Customer', help="When syncing customers, start at a given id"),
+	'pay_sale_if_paid': fields.boolean('Pay Sale in Odoo if Paid in Magento', help="This wil pay the sale order on a deferred scheduled basis if the order status is paid in Magento.\nThis feature requires the module mage2odoo_sale_automation"),
 	'use_invoice_date': fields.boolean('Use Invoice Date from Magento'),
+	'deliver_if_delivered': fields.boolean('Delivery automatic if Delivered in Magento', help="Create and fulfill the sales order automatically if it is fulfilled in Magento.\nThis feature requires the module mage2odoo_sale_automation"),
+	'use_order_date_as_delivery_date': fields.boolean('Use Order Date as Delivery Date'),
 	'use_order_date': fields.boolean('Use Order Date from Magento'),
 	'default_product_tax': fields.many2one('account.tax', 'Default Tax', help="If this box is checked, tax will be applied to all products"),
 	'nontaxable_tax_class_id': fields.char('Nontaxable Class Id', help="This field can be used to not apply tax even with default tax applied"),

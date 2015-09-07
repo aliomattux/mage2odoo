@@ -42,7 +42,9 @@ class SaleOrder(osv.osv):
             'payment_term': payment_term,
             'user_id': dedicated_salesman,
         }
-        delivery_onchange = self.onchange_delivery_id(cr, uid, ids, False, partner_id, shipping_address_id, False,  context=context)
+        delivery_onchange = self.onchange_delivery_id(cr, uid, ids, False, partner_id, \
+		shipping_address_id, False,  context=context
+	)
         val.update(delivery_onchange['value'])
         if pricelist:
             val['pricelist_id'] = pricelist
@@ -223,19 +225,16 @@ class SaleOrder(osv.osv):
         for item in order['items']:
 
 	    if item['product_type'] == 'simple' or not item['product_type']:
+		product = product_obj.get_or_create_odoo_record(
+                    cr, uid, job, item['product_id'], item=item)
+
                 values = {
                     'name': item['name'] or item['sku'],
                     'price_unit': float(item['price']),
-   #                 'product_uom':
-    #                    website_obj.get_default_uom(
-     #                       cursor, user, context
-      #              ).id,
+		    'product_uom': product.uom_id.id,
                     'product_uom_qty': float(item['qty_ordered']),
                   #  'magento_notes': item['product_options'],
-#                    'type': 'make_to_order',
-                    'product_id': product_obj.get_or_create_odoo_record(
-                                cr, uid, job, item['product_id'], item=item,
-                    ).id
+		    'product_id': product.id,
                 }
 
 		tax_percent = item.get('tax_percent')

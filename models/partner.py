@@ -132,7 +132,8 @@ class ResPartner(osv.osv):
 		cr, uid, address, address_data
 	    ):
 		address.company = address_data.get('company')
-		address.type = address_type
+		if address_type:
+		    address.type = address_type
 		address.external_address_id = address_data.get('entity_id')
 	        return address
 
