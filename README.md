@@ -87,6 +87,11 @@ https://github.com/aliomattux/mage2odoo_custom_shipping_account
 
 This module adds functionality to the sales order similar to a custom Magento module that allows you to specify a customers shipping account for FedEx/UPS
 
+https://github.com/aliomattux/mage2odoo_cart2quote
+
+This module allows you to integrate Cart2Quote module for Magento with Odoo. This module can create Quotes in Magento that can be validated from Odoo
+
+
 Donate to our project
 ---------------------
 
