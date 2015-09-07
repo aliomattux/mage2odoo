@@ -91,6 +91,10 @@ https://github.com/aliomattux/mage2odoo_cart2quote
 
 This module allows you to integrate Cart2Quote module for Magento with Odoo. This module can create Quotes in Magento that can be validated from Odoo
 
+https://github.com/aliomattux/mage2odoo_product_links
+
+This module allows you to import product upsell/cross sell from Magento. You can pop up window in sale order lines, just as you would in Magento to select options.
+
 
 Donate to our project
 ---------------------
