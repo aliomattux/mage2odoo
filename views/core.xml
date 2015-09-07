@@ -26,34 +26,47 @@
             <field name="arch" type="xml">
 		<form>
 		    <sheet>
-		        <h1>
-                            <field name="name" />
-		        </h1>
+			<h1>
+			    <label string="Configure your Magento Integration" />
+			</h1>
+			<br/>
+			<group string="Integration Name">
+		            <h1>
+                                <field name="name" />
+		            </h1>
+			</group>
 		        <group colspan="4">
                             <field name="url" />
 		        </group>
-		        <group>
+		        <group string="Credentials">
 			    <field name="username"/>
 			    <field name="password" password="1" />
+			    <field name="sentry_dsn" />
+			    <field name="debug_mode" />
 		        </group>
-			<group string="Policy Defaults">
+			<group string="Order Policy Defaults">
 			    <field name="picking_policy" />
-			    <field name="deliver_if_delivered" />
-			    <field name="use_order_date_as_delivery_date" />
 			    <field name="invoice_policy" />
-			    <field name="pay_sale_if_paid" />
-			    <field name="use_invoice_date" />
-			    <field name="use_order_date" />
-			    <field name="import_disabled_products" />
 			</group>
-			<group string="Shipping Defaults" >
+			<group string="Accounting">
+			    <field name="use_order_date" />
+			    <field name="pay_sale_if_paid" />
+			    <field name="use_invoice_date"
+				attrs="{'invisible': [('pay_sale_if_paid', '=', False)]}"/>
+			    <field name="default_fiscal_position" />
+			</group>
+			<group string="Shipping">
 			    <field name="default_shipping_partner" />
 			    <field name="shipping_product" />
+			    <field name="deliver_if_delivered" />
+			    <field name="use_order_date_as_delivery_date"
+				attrs="{'invisible': [('deliver_if_delivered', '=', False)]}"/>
 			</group>
 			<group string="Customers">
 			    <field name="last_imported_customer" />
 			</group>
 			<group string="Products" >
+			    <field name="import_disabled_products" />
 			    <field name="default_product_tax" />
 			    <field name="nontaxable_tax_class_id" />
 			    <field name="import_images" />
