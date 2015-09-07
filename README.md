@@ -1,9 +1,6 @@
 Mage2Odoo - Turn Key Solution for Magento
 ---------
 
-Turn key solution for Magento. 
------------------------------
-
 Tested working with Odoo 8.0 Revision 04b252b72c3bb5568f002e05d2fa889a1b4aae90
 
 
