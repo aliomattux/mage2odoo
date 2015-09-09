@@ -56,8 +56,8 @@
 			    <field name="default_fiscal_position" />
 			</group>
 			<group string="Shipping">
-			    <field name="default_shipping_partner" />
-			    <field name="shipping_product" />
+			    <field name="default_shipping_partner" required="1" />
+			    <field name="shipping_product" required="1" />
 			    <field name="deliver_if_delivered" />
 			    <field name="use_order_date_as_delivery_date"
 				attrs="{'invisible': [('deliver_if_delivered', '=', False)]}"/>
