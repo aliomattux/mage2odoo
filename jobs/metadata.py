@@ -59,18 +59,24 @@ class MageIntegrator(osv.osv_memory):
     def sync_instance_order_statuses(self, cr, uid, job, context=None):
         records = self._get_job_data(cr, uid, job, 'sales_order.get_order_states', [])
         mage_order_state_obj = self.pool.get('mage.mapping.order.state')
-        for k, v in records.items():
-            vals = {'mage_order_state': k,
-                    'name': v
-            }
-            existing_ids = mage_order_state_obj.search(cr, uid,
-                [('mage_order_state', '=', k)])
+        for state, state_name in records.items():
+	    statuses = self._get_job_data(cr, uid, job, 'sales_order.get_order_statuses', [state])
+	    for k, v in statuses.items():
+		print 'State', state
+		print 'Status', k
+                vals = {'mage_order_state': state,
+		        'mage_order_status': k,
+			'mage_order_status_name': v,
+                        'name': state_name
+                }
+                existing_ids = mage_order_state_obj.search(cr, uid,
+                    [('mage_order_status', '=', k)])
 
-            if not existing_ids:
-                result = mage_order_state_obj.create(cr, uid, vals)
-                print (True, result)
-            else:
-                print (False, existing_ids[0])
+                if not existing_ids:
+                    result = mage_order_state_obj.create(cr, uid, vals)
+                    print (True, result)
+                else:
+                    print (False, existing_ids[0])
 
         return True
 

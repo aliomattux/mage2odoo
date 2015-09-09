@@ -215,9 +215,12 @@ class MageStoreView(osv.osv):
 
 class MageMappingOrderState(osv.osv):
     _name = 'mage.mapping.order.state'
+    _name_get = 'mage_order_status_name'
     _columns = {
 	'name': fields.char('Name'),
 	'mage_order_state': fields.char('Magento Order State'),
+	'mage_order_status': fields.char('Magento Order Status'),
+	'mage_order_status_name': fields.char('Magento Order Status Name'),
 	'odoo_order_state': fields.selection([
 		('draft', 'Draft Quotation'),
 		('sent', 'Quotation Sent'),

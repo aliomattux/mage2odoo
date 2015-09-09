@@ -8,6 +8,8 @@
                 <tree editable="top">
                     <field name="name" />
                     <field name="mage_order_state" />
+		    <field name="mage_order_status" />
+		    <field name="mage_order_status_name" />
 		    <field name="odoo_order_state" />
                 </tree>
             </field>
