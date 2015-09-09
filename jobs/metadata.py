@@ -1,5 +1,6 @@
 from openerp.osv import osv, fields
 from pprint import pprint as pp
+from openerp.tools.translate import _
 
 class MageIntegrator(osv.osv_memory):
 
@@ -7,12 +8,18 @@ class MageIntegrator(osv.osv_memory):
 
 
     def sync_mage_metadata(self, cr, uid, job, context=None):
-        self.import_websites(cr, uid, job)
-        self.import_store_groups(cr, uid, job)
-        self.import_store_views(cr, uid, job)
-        self.sync_mage_carriers(cr, uid, job)
-	self.sync_all_taxes(cr, uid, job)
-        self.sync_instance_order_statuses(cr, uid, job)
+	try:
+            self.import_websites(cr, uid, job)
+            self.import_store_groups(cr, uid, job)
+            self.import_store_views(cr, uid, job)
+            self.sync_mage_carriers(cr, uid, job)
+	#TODO: Requires investigation
+#	    self.sync_all_taxes(cr, uid, job)
+            self.sync_instance_order_statuses(cr, uid, job)
+
+	except Exception, e:
+	    raise osv.except_osv(_('Metadata Sync Error'), _(str(e)))
+
         return True
 
 
@@ -21,9 +28,10 @@ class MageIntegrator(osv.osv_memory):
         carrier_obj = self.pool.get('delivery.carrier')
 
         for record in records:
-           vals = carrier_obj.prepare_odoo_record_vals(cr, uid, job, record)
-           carrier = carrier_obj.upsert_mage_record(cr, uid, vals)
-           print carrier
+	    for method in record['methods']:
+                vals = carrier_obj.prepare_odoo_record_vals(cr, uid, job, method)
+                carrier = carrier_obj.upsert_mage_record(cr, uid, vals)
+                print carrier
 
 	return True
 
