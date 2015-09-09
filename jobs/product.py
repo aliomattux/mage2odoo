@@ -116,9 +116,12 @@ class MageIntegrator(osv.osv_memory):
         mappinglines = self._get_mappinglines(cr, uid, job.mapping.id)
 
 	for data in datas:
-            records = self._get_job_data(cr, uid, job, 'oo_catalog_product.multinfo', [data, link])
-            self.process_mage_products_response(cr, uid, job, mappinglines, records)
-	    cr.commit()
+	    try:
+                records = self._get_job_data(cr, uid, job, 'oo_catalog_product.multinfo', [data, link])
+                self.process_mage_products_response(cr, uid, job, mappinglines, records)
+	        cr.commit()
+	    except Exception, e:
+		print e
 
 	return True
 
