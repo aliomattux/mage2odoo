@@ -49,7 +49,7 @@ DEFAULT_JOBS = [
                  'scheduler': False,
                  'mapping_name': '',
                  'mapping_lines': ''},
-                {'name': 'Sync All Partners',
+                {'name': 'Sync Updated Partners',
                  'mapping_model_name': '',
                  'python_function_name': 'import_updated_partners',
                  'job_type': 'system',
