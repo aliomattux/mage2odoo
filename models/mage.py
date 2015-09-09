@@ -44,6 +44,8 @@ class MageSetup(osv.osv):
                 ('picking', 'On Delivery Order'),
                 ('prepaid', 'Before Delivery')], 'Invoice Policy'
 	),
+	'states_or_statusus': fields.selection([('status', 'Import by Status'), ('state', 'Import by State')],
+	string='Import by Status or State', required=True),
         'order_statuses': fields.many2many('mage.mapping.order.state', 'mage_setup_import_status_rel', 'status_id', \
                 'storeview_id', 'Import Order Statuses'
         ),

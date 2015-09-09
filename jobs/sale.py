@@ -63,14 +63,21 @@ class MageIntegrator(osv.osv_memory):
 
 	if not job.mage_instance.order_statuses and not storeview.allow_storeview_level_statuses:
 	    statuses = DEFAULT_STATUS_FILTERS
+
 	elif storeview.allow_storeview_level_statuses and storeview.order_statuses:
-	    statuses = [s.mage_order_state for s in storeview.order_statuses]
+	    if job.mage_instance.states_or_statuses == 'state':
+	        statuses = [s.mage_order_state for s in storeview.order_statuses]
+	    else:
+		statuses = [s.mage_order_status for s in storeview.order_statuses]
 	else:
-	    statuses = [s.mage_order_state for s in job.mage_instance.order_statuses]
+	    if job.mage_instance.states_or_statuses == 'state':
+	        statuses = [s.mage_order_state for s in job.mage_instance.order_statuses]
+	    else:
+		statuses = [s.mage_order_status for s in job.mage_instance.order_statuses]
 
 	filters = {
 		'store_id': {'=':storeview.external_id},
-		'status': {'in': statuses}
+		'state': {'in': statuses}
 	}
 
 
@@ -82,6 +89,7 @@ class MageIntegrator(osv.osv_memory):
 	    filters.update({'CREATED_AT': dict})
 	#Make the external call and get the order ids
 	#Calling info is really inefficient because it loads data we dont need
+	print 'Filters', filters
 	order_data = self._get_job_data(cr, uid, job, 'sales_order.search', [filters])
 
 	if not order_data:

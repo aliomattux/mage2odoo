@@ -45,6 +45,7 @@
 			    <field name="debug_mode" />
 		        </group>
 			<group string="Order Policy Defaults">
+			    <field name="states_or_statusus" />
 			    <field name="picking_policy" />
 			    <field name="invoice_policy" />
 			</group>
