@@ -77,9 +77,8 @@ class MageIntegrator(osv.osv_memory):
 
 	filters = {
 		'store_id': {'=':storeview.external_id},
-		'state': {'in': statuses}
+		'status': {'in': statuses}
 	}
-
 
 	if start_time:
 	    filters.update({'created_at': {'gteq': start_time}})
