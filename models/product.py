@@ -145,7 +145,14 @@ class ProductProduct(osv.osv):
 	vals['taxes_id'] = self.apply_taxes(cr, uid, job, record)
 
         if record.get('categories'):
-            vals['categories'] = self._find_categories(cr, uid, record['categories']),
+           categ_ids = self._find_categories(cr, uid, record['categories'])
+	   #Copy what someone else did, just apply the first category as primary randomly
+	   #To satisfy unpredictable reporting requirement ;)
+           if categ_ids:
+               vals['categ_id'] = categ_ids[0]
+
+            vals['categories'] = [(6, 0, categ_ids)]
+
 
         if record.get('websites'):
             vals['websites'] = self._find_websites(cr, uid, record['websites'])
@@ -159,7 +166,7 @@ class ProductProduct(osv.osv):
     def _find_categories(self, cr, uid, categories):
         cat_obj = self.pool.get('product.category')
         category_ids = cat_obj.search(cr, uid, [('external_id', 'in', categories)])
-        return [(6, 0, category_ids)]
+        return category_ids
 
 
     def _find_super_attributes(self, cr, uid, super_attributes):
