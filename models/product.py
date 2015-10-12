@@ -151,7 +151,7 @@ class ProductProduct(osv.osv):
            if categ_ids:
                vals['categ_id'] = categ_ids[0]
 
-            vals['categories'] = [(6, 0, categ_ids)]
+           vals['categories'] = [(6, 0, categ_ids)]
 
 
         if record.get('websites'):
