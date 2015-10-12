@@ -48,12 +48,12 @@
 		    <field name="partner_id" on_change="onchange_sale_partner_id(partner_id, context)" domain="[('parent_id', '=', False)]" context="{'search_default_customer':1}" options='{"always_reload": True}'/>
 		    <field name="order_email" />
 		</field>
-		<group name="payment" position="inside">
-		    <field name="mage_invoice_complete" />
-		    <field name="mage_order_prepaid" />
-		    <field name="mage_order_total" />
-		    <field name="mage_paid_total" />
-		    <field name="mage_paid_date" />
+		<group name="payment" position="inside" >
+		    <field name="mage_invoice_complete" attrs="{'invisible': [('mage_store', '=', False)]}"/>
+		    <field name="mage_order_prepaid" attrs="{'invisible': [('mage_store', '=', False)]}"/>
+		    <field name="mage_order_total" attrs="{'invisible': [('mage_store', '=', False)]}"/>
+		    <field name="mage_paid_total" attrs="{'invisible': [('mage_store', '=', False)]}"/>
+		    <field name="mage_paid_date" attrs="{'invisible': [('mage_store', '=', False)]}"/>
 		</group>
 		<group name="payment" position="before" >
 		    <group>
