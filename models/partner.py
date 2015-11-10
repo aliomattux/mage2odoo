@@ -252,7 +252,7 @@ class ResPartner(osv.osv):
             'city': vals['city'],
             'zip': vals['zip'],
             'phone': address_data['telephone'],
-            'fax': address_data['fax'],
+            'fax': address_data.get('fax'),
             'parent_id': partner.id,
         }, context=context)
 

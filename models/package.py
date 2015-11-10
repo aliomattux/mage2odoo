@@ -7,7 +7,7 @@ class StockOutPackage(osv.osv):
 	'sale': fields.many2one('sale.order', select=True),
 	'mage_package_state': fields.selection([('pending', 'Pending'),
 						('exception', 'Exception'),
-						('done', 'Dome')
+						('done', 'Done')
 	], 'Mage Package State', select=True),
     }
 

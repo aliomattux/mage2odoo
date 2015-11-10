@@ -5,6 +5,7 @@ class SaleOrder(osv.osv):
     _inherit = 'sale.order'
     _columns = {
 	'mage_store': fields.many2one('mage.store.view', 'Magento Store'),
+	'mage_cart_id': fields.integer('Magento Cart ID'),
 	'order_email': fields.char('Magento Email', readonly=True),
 	'ip_address': fields.char('IP Address'),
 	'partner_invoice_id': fields.many2one('res.partner', 'Invoice Address', readonly=True, required=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Invoice address for current sales order.", domain="[('parent_id', '=', partner_id)]"),
@@ -230,6 +231,7 @@ class SaleOrder(osv.osv):
 
                 values = {
                     'name': item['name'] or item['sku'],
+		    'purchase_price': product.standard_price or 0.00,
                     'price_unit': float(item['price']),
 		    'product_uom': product.uom_id.id,
                     'product_uom_qty': float(item['qty_ordered']),

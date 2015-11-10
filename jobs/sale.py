@@ -52,8 +52,8 @@ class MageIntegrator(osv.osv_memory):
 	start_time = storeview.import_orders_start_datetime
 	end_time = storeview.import_orders_end_datetime
 
-#	elif storeview.last_import_datetime:
-#	    start_time = storeview.last_import_datetime
+	if storeview.last_import_datetime:
+	    start_time = storeview.last_import_datetime
 
 	if storeview.invoice_policy:
 	    defaults.update({'order_policy': storeview.invoice_policy})
@@ -136,7 +136,7 @@ class MageIntegrator(osv.osv_memory):
 	        order_obj = self.pool.get('sale.order')
 	        order_ids = order_obj.search(cr, uid, [('mage_order_number', '=', order['increment_id'])])
 	        if order_ids:
-		    status = self.set_one_order_status(cr, uid, job, order, 'imported', 'Order Imported')
+#		    status = self.set_one_order_status(cr, uid, job, order, 'imported', 'Order Imported')
 		    print 'Skipping existing order %s' % order['increment_id']
 		    continue
 
