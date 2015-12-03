@@ -11,9 +11,9 @@
 		    <field name="lastname" />
 		    <field name="company" />
 		</field>
-		<field name="mobile" position="after">
+<!--		<field name="mobile" position="after">
 		    <field name="external_address_id" />
-		</field>
+		</field> -->
 	    </field>
 	</record>
 

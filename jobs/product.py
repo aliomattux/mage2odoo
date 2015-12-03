@@ -140,7 +140,7 @@ class MageIntegrator(osv.osv_memory):
 	    img_url = base_url + media_ext
 
         for record in records:
-	   # pp(record)
+	  #  pp(record)
 	    #Solves bug with null sku
 	    if not record['sku']:
 		continue

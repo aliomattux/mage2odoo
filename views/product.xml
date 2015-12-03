@@ -77,6 +77,7 @@
 		        <group string="General">
 			    <field name="set" />
 			    <field name="mage_type" />
+			    <field name="external_id" />
 			    <field name="mage_tax_class" />
 			    <field name="shipping_product" />
 			    <field name="mage_manage_stock" />

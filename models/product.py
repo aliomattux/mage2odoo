@@ -9,7 +9,7 @@ PRODUCT_TYPES = {
                 'simple': 'product',
                 'configurable': 'service',
                 'bundle': 'service',
-                'group': 'service',
+                'grouped': 'product',
                 'virtual': 'service',
 }
 
@@ -107,6 +107,7 @@ class ProductProduct(osv.osv):
 
 	return self.browse(cr, uid, product_id)
 
+
     def apply_taxes(self, cr, uid, job, record, context=None):
 	instance = job.mage_instance
 	if instance.default_product_tax:
@@ -141,6 +142,7 @@ class ProductProduct(osv.osv):
                 'type': PRODUCT_TYPES.get(record['type_id']) or 'product',
                 'sync_to_mage': True,
         }
+
 
 	vals['taxes_id'] = self.apply_taxes(cr, uid, job, record)
 
