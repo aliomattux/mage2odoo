@@ -1,6 +1,41 @@
 <openerp>
     <data>
 
+       <record id="view_res_partner_new_filter" model="ir.ui.view">
+            <field name="name">res.partner.select.new.filter</field>
+            <field name="model">res.partner</field>
+	    <field name="inherit_id" ref="base.view_res_partner_filter" />
+            <field name="arch" type="xml">
+                   <filter name="customer" position="after">
+                       <filter string="Entity" name="entity_only" domain="[('parent_id','=',False)]" help="Only Parent Records"/>
+                       <filter string="Email" name="email" filter_domain="[('email','ilike', self)]" />
+                       <filter string="Phone" name="phone" filter_domain="[('phone','ilike', self)]" />
+
+
+		   </filter>
+	    </field>
+	</record>
+
+        <record id="base.action_partner_form" model="ir.actions.act_window">
+            <field name="name">Customers</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,kanban</field>
+            <field name="context">{"search_default_entity_only": 1}</field>
+            <field name="search_view_id" ref="base.view_res_partner_filter"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Test
+              </p><p>
+                Odoo helps you easily track all activities related to
+                a customer; discussions, history of business opportunities,
+                documents, etc.
+              </p>
+            </field>
+        </record>
+
+
         <record id="mage_partner_simple_form" model="ir.ui.view">
             <field name="name">Mage Partner Simple Form</field>
             <field name="model">res.partner</field>
