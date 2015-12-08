@@ -67,7 +67,7 @@ class MageIntegrator(osv.osv_memory):
                 vals = {'mage_order_state': state,
 		        'mage_order_status': k,
 			'mage_order_status_name': v,
-                        'name': state_name
+                        'name': v
                 }
                 existing_ids = mage_order_state_obj.search(cr, uid,
                     [('mage_order_status', '=', k)])
@@ -76,6 +76,7 @@ class MageIntegrator(osv.osv_memory):
                     result = mage_order_state_obj.create(cr, uid, vals)
                     print (True, result)
                 else:
+		    mage_order_state_obj.write(cr, uid, existing_ids[0], vals)
                     print (False, existing_ids[0])
 
         return True
