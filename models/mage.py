@@ -33,6 +33,7 @@ class MageSetup(osv.osv):
 	),
 	'last_imported_customer': fields.integer('Last Imported Customer', help="When syncing customers, start at a given id"),
 	'pay_sale_if_paid': fields.boolean('Pay Sale in Odoo if Paid in Magento', help="This wil pay the sale order on a deferred scheduled basis if the order status is paid in Magento.\nThis feature requires the module mage2odoo_sale_automation"),
+	'use_company': fields.boolean('Use the company name as partner name'),
 	'use_invoice_date': fields.boolean('Use Invoice Date from Magento'),
 	'deliver_if_delivered': fields.boolean('Delivery automatic if Delivered in Magento', help="Create and fulfill the sales order automatically if it is fulfilled in Magento.\nThis feature requires the module mage2odoo_sale_automation"),
 	'use_order_date_as_delivery_date': fields.boolean('Use Order Date as Delivery Date'),

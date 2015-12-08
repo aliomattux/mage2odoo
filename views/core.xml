@@ -65,6 +65,7 @@
 			</group>
 			<group string="Customers">
 			    <field name="last_imported_customer" />
+			    <field name="use_company" />
 			</group>
 			<group string="Products" >
 			    <field name="import_disabled_products" />

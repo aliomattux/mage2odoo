@@ -51,10 +51,8 @@ class MageIntegrator(osv.osv_memory):
 
 	start_time = storeview.import_orders_start_datetime
 	end_time = storeview.import_orders_end_datetime
-	if storeview.skip_order_status:
-	    skip_status = True
-	else:
-	    skip_status = False
+	skip_status = storeview.skip_order_status
+	use_company = job.mage_instance.use_company
 
 	if storeview.last_import_datetime:
 	    start_time = storeview.last_import_datetime
@@ -147,7 +145,7 @@ class MageIntegrator(osv.osv_memory):
 		    continue
 
 	        try:
-	            sale_order = self.process_one_order(cr, uid, job, order, storeview, payment_defaults, defaults, mappinglines)
+	            sale_order = self.process_one_order(cr, uid, job, order, storeview, payment_defaults, defaults, mappinglines, use_company)
 		    #Implement something to auto approve if configured
 #		    sale_order.action_button_confirm()
 
@@ -169,11 +167,11 @@ class MageIntegrator(osv.osv_memory):
 	return True
 
 
-    def process_one_order(self, cr, uid, job, order, storeview, payment_defaults, defaults=False, mappinglines=False):
+    def process_one_order(self, cr, uid, job, order, storeview, payment_defaults, defaults=False, mappinglines=False, use_company=False):
 	order_obj = self.pool.get('sale.order')
 	partner_obj = self.pool.get('res.partner')
 
-	vals = order_obj.prepare_odoo_record_vals(cr, uid, job, order, payment_defaults, defaults, storeview)
+	vals = order_obj.prepare_odoo_record_vals(cr, uid, job, order, payment_defaults, defaults, storeview, use_company)
 
 	if mappinglines:
             vals.update(self._transform_record(cr, uid, job, order, 'from_mage_to_odoo', mappinglines))
