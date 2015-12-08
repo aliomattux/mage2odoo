@@ -181,6 +181,7 @@ class MageStoreView(osv.osv):
                 ('picking', 'On Delivery Order'),
                 ('prepaid', 'Before Delivery')], 'Invoice Policy'
         ),
+	'skip_order_status': fields.boolean('Do not change status on Magento'),
 	'do_not_import': fields.boolean('Do Not Import'),
 	'external_id': fields.integer('External Id'),
 	'sort_order': fields.integer('Sort Order'),

@@ -1,0 +1,47 @@
+<openerp>
+    <data>
+
+        <record id="view_picking_manual_package_form" model="ir.ui.view">
+            <field name="name">Picking Manual Package Form</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock_package.view_picking_package_form" />
+            <field name="arch" type="xml">
+                <group string="Packages" position="before">
+		    <button name=""%(action_create_manual_package)d" string="Create Package" type="action" />
+                </group>
+            </field>
+        </record>
+
+        <record id="view_manual_shipment" model="ir.ui.view">
+            <field name="name">Create Package/Enter Tracking #</field>
+            <field name="model">manual.package</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Create Package">
+                    <separator colspan="4" />
+                    <field name="fulfillment" required="True" />
+                    <newline/>
+                        <newline/>
+                        <field name="shipper" />
+                        <newline/>
+                        <field name="tracking_number" required="1"/>
+                    <newline/>
+                    <button colspan="1" icon="gtk-cancel" special="cancel" string="Cancel"/>
+                    <button name="button_create_package" string="Record Package" type="object" icon="terp-gtk-go-back-rtl"/>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_create_manual_package" model="ir.actions.act_window">
+            <field name="name">Create Package</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sale.authorize.payment</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="authorize_payment_form"/>
+            <field name="target">new</field>
+        </record>
+    </data>
+</openerp>
+
+
