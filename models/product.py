@@ -127,6 +127,10 @@ class ProductProduct(osv.osv):
 	set_obj = self.pool.get('product.attribute.set')
         vals = {
 		'active': True,
+		'weight': record.get('weight'),
+		'standard_price': record.get('cost'),
+		'upc': record.get('upc'),
+		'list_price': record.get('price'),
                 'description': record.get('description', ' '),
                 'mage_status': record['status'],
                 'name': record['name'],
