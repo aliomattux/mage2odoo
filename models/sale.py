@@ -231,7 +231,6 @@ class SaleOrder(osv.osv):
 
                 values = {
                     'name': item['name'] or item['sku'],
-		    'purchase_price': product.standard_price or 0.00,
                     'price_unit': float(item['price']),
 		    'product_uom': product.uom_id.id,
                     'product_uom_qty': float(item['qty_ordered']),
