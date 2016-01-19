@@ -10,8 +10,6 @@
                        <filter string="Entity" name="entity_only" domain="[('parent_id','=',False)]" help="Only Parent Records"/>
                        <filter string="Email" name="email" filter_domain="[('email','ilike', self)]" />
                        <filter string="Phone" name="phone" filter_domain="[('phone','ilike', self)]" />
-
-
 		   </filter>
 	    </field>
 	</record>
@@ -23,7 +21,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,kanban</field>
             <field name="context">{"search_default_entity_only": 1}</field>
-            <field name="search_view_id" ref="base.view_res_partner_filter"/>
+            <field name="search_view_id" ref="view_res_partner_new_filter"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Test

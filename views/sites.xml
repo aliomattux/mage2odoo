@@ -113,6 +113,7 @@
 			    <field name="picking_policy" />
 			    <field name="invoice_policy" />
 			    <field name="skip_order_status" />
+			    <field name="odoo_guest_customer" />
 			    <field name="do_not_import" />
 			    <field name="allow_storeview_level_statuses" />
 			    <group string="Statuses" colspan="4" attrs="{'invisible': [('allow_storeview_level_statuses', '!=', True)]}">

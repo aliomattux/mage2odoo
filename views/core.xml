@@ -65,9 +65,9 @@
 			</group>
 			<group string="Customers">
 			    <field name="last_imported_customer" />
-			    <field name="use_company" />
 			</group>
 			<group string="Products" >
+			    <field name="integrity_product" />
 			    <field name="import_disabled_products" />
 			    <field name="default_product_tax" />
 			    <field name="nontaxable_tax_class_id" />

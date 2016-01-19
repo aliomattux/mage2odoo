@@ -1,4 +1,5 @@
 from openerp.osv import osv, fields
+from openerp.tools.translate import _
 from pprint import pprint as pp
 
 class SaleOrder(osv.osv):
@@ -109,17 +110,16 @@ class SaleOrder(osv.osv):
 	    
 
     def prepare_odoo_record_vals(self, cr, uid, job, record, payment_defaults, \
-		defaults, storeview=False, use_company=False
+		defaults, integrity_product, storeview=False
 	):
 	    
 	partner_obj = self.pool.get('res.partner')
-
         if record['customer_id']:
-            partner = partner_obj.get_or_create_order_customer(cr, uid, use_company, record)
+            partner = partner_obj.get_or_create_order_customer(cr, uid, record)
 
 	else:
-	    record['customer_id'] = 0
-	    partner = partner_obj.get_or_create_order_customer(cr, uid, use_company, record)
+	    record['customer_id'] = '0'
+	    partner = partner_obj.get_or_create_order_customer(cr, uid, record)
 
         invoice_address = partner_obj.get_or_create_partner_address(cr, uid, \
                 record['billing_address'], partner, 'invoice'
@@ -156,7 +156,7 @@ class SaleOrder(osv.osv):
 #               'state':
 #               'pricelist_id':
                 'ip_address': record.get('x_forwarded_for'),
-		'order_line': self.prepare_odoo_line_record_vals(cr, uid, job, record, rates),
+		'order_line': self.prepare_odoo_line_record_vals(cr, uid, job, record, rates, integrity_product),
                 'external_id': record.get('order_id'),
         }
 
@@ -214,7 +214,7 @@ class SaleOrder(osv.osv):
 
 
     def prepare_odoo_line_record_vals(
-        self, cr, uid, job, order, rates, context=None
+        self, cr, uid, job, order, rates, integrity_product, context=None
     ):
         """Make data for an item line from the magento data.
         This method decides the actions to be taken on different product types
@@ -226,9 +226,19 @@ class SaleOrder(osv.osv):
         for item in order['items']:
 
 	    if item['product_type'] == 'simple' or not item['product_type']:
-		product = product_obj.get_or_create_odoo_record(
-                    cr, uid, job, item['product_id'], item=item)
 
+		try:
+		    product = product_obj.get_or_create_odoo_record(
+                        cr, uid, job, item['product_id'], item=item)
+		except Exception, e:
+		    product = False
+
+		if not product and integrity_product:
+		    product = integrity_product
+
+		if not product:
+		    raise osv.except_osv(_('Data Error'), _("Could not find any suitable product for order: %s") \
+			% order['increment_id'])
                 values = {
                     'name': item['name'] or item['sku'],
                     'price_unit': float(item['price']),

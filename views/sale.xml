@@ -42,9 +42,6 @@
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="payment_method.view_sale_billing_form" />
             <field name="arch" type="xml">
-                <button name="invoice_recreate" position="before" >
-                    <button name="create_mage_sale_order" type="object" string="Create Magento Order" />
-		</button>
 		<field name="partner_invoice_id" position="replace" />
 		<field name="partner_shipping_id" position="replace" />
 		<field name="partner_id" position="replace">

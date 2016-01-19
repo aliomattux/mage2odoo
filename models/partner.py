@@ -54,7 +54,7 @@ class ResPartner(osv.osv):
 	return True
 
 
-    def get_or_create_customer(self, cr, uid, use_company, record, context=None):
+    def get_or_create_customer(self, cr, uid, record, context=None):
 
         partner_ids = self.search(cr, uid, [('external_id', '=', \
             record['entity_id'])], limit=1)
@@ -75,20 +75,19 @@ class ResPartner(osv.osv):
 
 	    }
 
-	    if use_company:
-	        #If there is a company in the parent record use that instead as this is a company
-	        if record.get('addresses') and record['addresses'][0].get('company'):
-		    vals['is_company'] = True
-		    vals['name'] = record['addresses'][0]['company']
 
 	    partner = self.create(cr, uid, vals)
 
 	    return self.browse(cr, uid, partner)
 
 
-    def get_or_create_order_customer(self, cr, uid, use_company, record, context=None):
+    def get_or_create_order_customer(self, cr, uid, record, context=None):
 
-	if record['customer_id'] == '0' or record.get('customer_is_guest') \
+
+	if record.get('odoo_customer_id'):
+	    return self.browse(cr, uid, record['odoo_customer_id'])
+
+	elif record['customer_id'] == '0' or record.get('customer_is_guest') \
 		and record.get('customer_is_guest') == '1':
 	    partner_ids = []
 
@@ -102,6 +101,10 @@ class ResPartner(osv.osv):
 	else:
 	    firstname = record['customer_firstname']
 	    lastname = record['customer_lastname'] or 'no lastname'
+	    if not firstname:
+		firstname = 'No Firstname'
+	    if not lastname:
+		lastname = 'No Lastname'
 	    vals = {
 		    'firstname': firstname,
 		    'lastname': lastname,
@@ -112,11 +115,6 @@ class ResPartner(osv.osv):
 
 	    }
 
-	    if use_company:
-	        #If there is a company in the parent record use that instead as this is a company
-	        if record.get('billing_address') and record['billing_address'].get('company'):
-		    vals['is_company'] = True
-		    vals['name'] = record['billing_address']['company']
 
 	    partner = self.create(cr, uid, vals)
 

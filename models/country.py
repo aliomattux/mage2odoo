@@ -119,12 +119,16 @@ class ResCountryState(osv.Model):
                 _('No country found with code %s' % country.code)
             )
         finally:
-      #      state_id = self.create(
-       #         cursor, user, {
-        #            'name': region,
-         #           'country_id': country.id,
-          #          'code': code,
-           #     }, context=context
-        #    )
-	    raise
+	    if not region:
+		raise
+	    if not code:
+		code = 'NAN'
+            state_id = self.create(
+                cursor, user, {
+                    'name': region,
+                    'country_id': country.id,
+                    'code': code,
+                }, context=context
+            )
+	 #   raise
         return self.browse(cursor, user, state_id, context=context)

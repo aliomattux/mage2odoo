@@ -361,7 +361,8 @@ def get_and_create_mage_record(self, cr, uid, job, method, external_id):
     credentials = mage_obj._get_credentials(job)
     record = mage_obj._mage_call(credentials, method, [external_id])
     if not record:
-	raise osv.except_osv(_('Data Error'), _('Call was successful but no data returned for reference: %s')%external_id)	
+	return False
+#	raise osv.except_osv(_('Data Error'), _('Call was successful but no data returned for reference: %s')%external_id)	
     return self.create_mage_record(cr, uid, job, record)
 
 

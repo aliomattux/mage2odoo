@@ -13,6 +13,7 @@ class MageSetup(osv.osv):
 		"All: This will send every event, success and failure to Sentry"),
 	'sentry_dsn': fields.char('Sentry DSN', help="Exception Messages wil be sent to the logging server"),
 	'url': fields.char('URL', required=True),
+	'integrity_product': fields.many2one('product.product', 'Product Deleted Replacement', help="Select a product to use in the case a product returned on an order has been deleted from Magento"),
 	'import_images': fields.boolean('Import Images'),
 	'import_images_method': fields.selection([
 		('standalone', 'Separately'),
@@ -33,7 +34,6 @@ class MageSetup(osv.osv):
 	),
 	'last_imported_customer': fields.integer('Last Imported Customer', help="When syncing customers, start at a given id"),
 	'pay_sale_if_paid': fields.boolean('Pay Sale in Odoo if Paid in Magento', help="This wil pay the sale order on a deferred scheduled basis if the order status is paid in Magento.\nThis feature requires the module mage2odoo_sale_automation"),
-	'use_company': fields.boolean('Use the company name as partner name'),
 	'use_invoice_date': fields.boolean('Use Invoice Date from Magento'),
 	'deliver_if_delivered': fields.boolean('Delivery automatic if Delivered in Magento', help="Create and fulfill the sales order automatically if it is fulfilled in Magento.\nThis feature requires the module mage2odoo_sale_automation"),
 	'use_order_date_as_delivery_date': fields.boolean('Use Order Date as Delivery Date'),
@@ -186,6 +186,7 @@ class MageStoreView(osv.osv):
 	'do_not_import': fields.boolean('Do Not Import'),
 	'external_id': fields.integer('External Id'),
 	'sort_order': fields.integer('Sort Order'),
+	'odoo_guest_customer': fields.many2one('res.partner', 'Stealth Checkout Customer'),
 	'import_orders_start_datetime': fields.datetime('Import Orders from This Time'),
 	'import_orders_end_datetime': fields.datetime('Import Orders To This Time'),
 	'warehouse': fields.many2one('stock.warehouse', 'Warehouse'),

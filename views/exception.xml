@@ -1,0 +1,55 @@
+<openerp>
+    <data>
+        <record id="view_mage_import_exceptions_search" model="ir.ui.view">
+            <field name="name">Mage Import Exceptions Search</field>
+            <field name="model">mage.import.exception</field>
+            <field name="arch" type="xml">
+		<search>
+		    <field name="type" />
+		    <field name="external_id" />
+		    <field name="message" />
+		</search>
+            </field>
+        </record>
+
+<!--
+        <record id="view_mage_import_exceptions_form" model="ir.ui.view">
+            <field name="name">Mage Import Exceptions Form</field>
+            <field name="model">mage.import.exception</field>
+            <field name="arch" type="xml">
+		<group>
+		</group>
+	    </field>
+	</record>
+-->
+
+        <record id="mage_import_exceptions_tree" model="ir.ui.view">
+            <field name="name">Mage Import Exceptions Tree</field>
+            <field name="model">mage.import.exception</field>
+            <field name="arch" type="xml">
+		<tree>
+		    <field name="external_id" />
+		    <field name="type" />
+		    <field name="message" />
+		</tree>
+	    </field>
+	</record>
+
+
+	<record id="action_mage_import_exceptions" model="ir.actions.act_window">
+	    <field name="name">Import Exceptions</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="res_model">mage.import.exception</field>
+	    <field name="view_type">form</field>
+	    <field name="context">{}</field>
+	    <field name="view_id" ref="mage_import_exceptions_tree"/>
+	    <field name="view_mode">tree,form</field>
+	    <field name="search_view_id" ref="view_mage_import_exceptions_search"/>
+	</record>
+
+        <menuitem id="menu_mage_import_exceptions"
+                action="action_mage_import_exceptions" parent="base.menu_sales"
+                sequence="10"/>
+    </data>
+</openerp>
+

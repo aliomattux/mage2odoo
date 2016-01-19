@@ -8,6 +8,17 @@ from magento import Product, ProductImages, API, Order, Customer, Cart, CartCust
 class SaleOrder(osv.osv):
     _inherit = 'sale.order'
 
+    def get_name_field(self, cr, uid, address, context=None):
+        if not address.firstname:
+            name_data = address.name.split(' ')
+            firstname = name_data[0]
+            lastname = name_data[1] if len(name_data) > 1 else False
+        else:
+            firstname = address.firstname
+            lastname = address.lastname
+
+        return (firstname, lastname)
+
     def create_mage_sale_order(self, cr, uid, ids, context=None):
 	sale = self.browse(cr, uid, ids[0])
 
@@ -54,7 +65,7 @@ class SaleOrder(osv.osv):
     def set_mage_cart_payment_method(self, cr, uid, sale, credentials, cart_id):
         try:
             with CartPayment(credentials['url'], credentials['username'], credentials['password']) as cart_api:
-		payment_data = {'method': 'checkmo'}
+		payment_data = {'method': 'purchaseorder'}
                 return cart_api.method(cart_id, payment_data, 1)
         except Exception, e:
             raise osv.except_osv(_('Shipping Exception!'),_(str(e)))
