@@ -48,21 +48,20 @@ class MageIntegrator(osv.osv_memory):
         datas = [partner_ids[i:i+900] for i in range(0, len(partner_ids), 900)]
  #       mappinglines = self._get_mappinglines(cr, uid, job.mapping.id)
 	instance = job.mage_instance
-	use_company = instance.use_partner_company
 	mappinglines = False
         for data in datas:
             records = self._get_job_data(cr, uid, job, 'oo_customer.multinfo', [data])
-            self.process_mage_partner_response(cr, uid, job, use_company, mappinglines, records)
+            self.process_mage_partner_response(cr, uid, job, mappinglines, records)
             cr.commit()
 
         return True
 
 
-    def process_mage_partner_response(self, cr, uid, job, use_company, mappinglines, records):
+    def process_mage_partner_response(self, cr, uid, job, mappinglines, records):
         partner_obj = self.pool.get('res.partner')
 	for record in records:
 	    try:
-	        partner = partner_obj.get_or_create_customer(cr, uid, use_company, record)
+	        partner = partner_obj.get_or_create_customer(cr, uid, record)
 		print 'Successfully synced Customer with Id %s' % record['entity_id']
 
 	        if record['addresses']:

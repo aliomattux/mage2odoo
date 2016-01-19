@@ -33,15 +33,18 @@ class MageIntegrator(osv.osv_memory):
             defaults.update({'picking_policy': job.mage_instance.picking_policy})
 
 	for storeview in storeview_obj.browse(cr, uid, store_ids):
-	    self.import_one_storeview_orders(cr, uid, job, storeview, payment_defaults, defaults, mappinglines)
+	    self.import_one_storeview_orders(cr, uid, job, instance, storeview, payment_defaults, defaults, mappinglines)
 	    storeview_obj.write(cr, uid, storeview.id, {'last_import_datetime': datetime.utcnow()})
 	    cr.commit()
 
 	return True
 
 
-    def import_one_storeview_orders(self, cr, uid, job, storeview, payment_defaults, defaults, mappinglines=False, context=None):
+    def import_one_storeview_orders(self, cr, uid, job, instance, storeview, payment_defaults, defaults, mappinglines=False, context=None):
 	start_time = False
+
+	exception_obj = self.pool.get('mage.import.exception')
+
         if not storeview.warehouse:
             raise osv.except_osv(_('Config Error'), _('Storeview %s has no warehouse. You must assign a warehouse in order to import orders')%storeview.name)
 
@@ -52,7 +55,10 @@ class MageIntegrator(osv.osv_memory):
 	start_time = storeview.import_orders_start_datetime
 	end_time = storeview.import_orders_end_datetime
 	skip_status = storeview.skip_order_status
-	use_company = job.mage_instance.use_company
+
+	odoo_guest_customer = storeview.odoo_guest_customer
+	#This field used to populate product on order if it was deleted in Magento so name can be preserved in history
+	integrity_product = instance.integrity_product
 
 	if storeview.last_import_datetime:
 	    start_time = storeview.last_import_datetime
@@ -90,11 +96,9 @@ class MageIntegrator(osv.osv_memory):
 	    filters.update({'CREATED_AT': dict})
 	#Make the external call and get the order ids
 	#Calling info is really inefficient because it loads data we dont need
-	print 'Filters', filters
 	order_data = self._get_job_data(cr, uid, job, 'sales_order.search', [filters])
 
 	if not order_data:
-	    print 'No Data'
 	    return True
 
 	#The following code needs a proper implementation,
@@ -144,12 +148,23 @@ class MageIntegrator(osv.osv_memory):
 		    print 'Skipping existing order %s' % order['increment_id']
 		    continue
 
+		#Assign guest checkout orders to odoo customer if applicable
+		if not order.get('customer_email') and order.get('customer_id') == '0' and odoo_guest_customer:
+		    order['odoo_customer_id'] = odoo_guest_customer.id
+
 	        try:
-	            sale_order = self.process_one_order(cr, uid, job, order, storeview, payment_defaults, defaults, mappinglines, use_company)
+	            sale_order = self.process_one_order(cr, uid, job, order, storeview, payment_defaults, defaults, integrity_product, mappinglines)
 		    #Implement something to auto approve if configured
 #		    sale_order.action_button_confirm()
 
 	        except Exception, e:
+		    exception_obj.create(cr, uid, {
+						'external_id': order['increment_id'],
+						'message': str(e),
+						'data': str(order),
+						'type': 'Sale Order',
+						'job': job.id,
+		    })
 		    print 'Exception Processing Order with Id: %s' % order['increment_id'], e
 		    continue
 
@@ -167,11 +182,11 @@ class MageIntegrator(osv.osv_memory):
 	return True
 
 
-    def process_one_order(self, cr, uid, job, order, storeview, payment_defaults, defaults=False, mappinglines=False, use_company=False):
+    def process_one_order(self, cr, uid, job, order, storeview, payment_defaults, defaults=False, integrity_product=False, mappinglines=False):
 	order_obj = self.pool.get('sale.order')
 	partner_obj = self.pool.get('res.partner')
 
-	vals = order_obj.prepare_odoo_record_vals(cr, uid, job, order, payment_defaults, defaults, storeview, use_company)
+	vals = order_obj.prepare_odoo_record_vals(cr, uid, job, order, payment_defaults, defaults, integrity_product, storeview)
 
 	if mappinglines:
             vals.update(self._transform_record(cr, uid, job, order, 'from_mage_to_odoo', mappinglines))
