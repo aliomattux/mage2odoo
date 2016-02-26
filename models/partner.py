@@ -262,6 +262,7 @@ class ResPartner(osv.osv):
             'country_id': country.id,
             'city': vals['city'],
             'zip': vals['zip'],
+	    'email': address_data.get('email'),
             'phone': address_data['telephone'],
 	    'email': address_data.get('email'),
             'fax': address_data.get('fax'),

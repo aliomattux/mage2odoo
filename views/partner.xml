@@ -8,8 +8,8 @@
             <field name="arch" type="xml">
                    <filter name="customer" position="after">
                        <filter string="Entity" name="entity_only" domain="[('parent_id','=',False)]" help="Only Parent Records"/>
-                       <filter string="Email" name="email" filter_domain="[('email','ilike', self)]" />
-                       <filter string="Phone" name="phone" filter_domain="[('phone','ilike', self)]" />
+                       <field string="Email" name="email" />
+                       <field string="Phone" name="phone" />
 		   </filter>
 	    </field>
 	</record>
