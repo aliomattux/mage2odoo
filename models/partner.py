@@ -59,7 +59,18 @@ class ResPartner(osv.osv):
         partner_ids = self.search(cr, uid, [('external_id', '=', \
             record['entity_id'])], limit=1)
 
+        vals = {
+                    'firstname': firstname,
+                    'lastname': lastname,
+                    'is_company': False,
+                    'name': firstname + ' ' + lastname,
+                    'email': record['email'],
+                    'external_id': record['entity_id'],
+
+        }
+
 	if partner_ids:
+	    self.write(cr, uid, partner_ids[0], vals)
 	    return self.browse(cr, uid, partner_ids[0])
 
 	else:
@@ -252,6 +263,7 @@ class ResPartner(osv.osv):
             'city': vals['city'],
             'zip': vals['zip'],
             'phone': address_data['telephone'],
+	    'email': address_data.get('email'),
             'fax': address_data.get('fax'),
             'parent_id': partner.id,
         }, context=context)

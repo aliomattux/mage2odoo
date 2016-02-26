@@ -123,6 +123,7 @@
                                             </div>
                                         </group>
 					<group>
+					    <field name="external_id" readonly="1" />
 					    <field name="external_address_id" readonly="1" />
 					</group>
                                         <field name="supplier" invisible="True"/>
