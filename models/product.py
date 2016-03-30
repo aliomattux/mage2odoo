@@ -18,6 +18,10 @@ class ProductTemplate(osv.osv):
     _inherit = 'product.template'
 
     _columns = {
+	'sync_stock': fields.boolean('Sync Stock'),
+        'always_in_stock': fields.boolean('Always in Stock'),
+        'manage_stock': fields.boolean('Manage Stock'),
+        'use_config_manage_stock': fields.boolean('Use Config Manage Stock'),
 	'shipping_product': fields.boolean('Shipping Product', help="Used to create totals like Magento"),
 	'set': fields.many2one('product.attribute.set', 'Attribute Set'),
 	'short_description': fields.text('Short Descripton'),
