@@ -91,7 +91,6 @@
 			    <field name="external_id" />
 			    <field name="mage_tax_class" />
 			    <field name="shipping_product" />
-			    <field name="mage_manage_stock" />
 			    <field name="img_path" />
 			    <field name="url_path" />
 		        </group>

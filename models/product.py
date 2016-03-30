@@ -57,7 +57,6 @@ class ProductTemplate(osv.osv):
 				       ('virtual', 'Virtual'),
         ], 'Mage Product Type'),
 	'url_key': fields.char('URL Key'),
-	'mage_manage_stock': fields.boolean('Manage Stock'),
 	'external_id': fields.integer('External Id', select=True, copy=False),
 	'sync_to_mage': fields.boolean('Magento Sync', copy=False),
         'super_attributes': fields.many2many('product.attribute',
