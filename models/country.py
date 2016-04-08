@@ -119,16 +119,27 @@ class ResCountryState(osv.Model):
                 _('No country found with code %s' % country.code)
             )
         finally:
-	    if not region:
-		raise
-	    if not code:
-		code = 'NAN'
-            state_id = self.create(
-                cursor, user, {
-                    'name': region,
-                    'country_id': country.id,
-                    'code': code,
-                }, context=context
-            )
-	 #   raise
+	    #TODO: are all 3 of these fields required?
+	    #We must detect in advance if create() will fail
+	    #Because Odoo cannot handle a try/catch around creation error
+	    if region and country and code:
+                state_id = self.create(
+                    cursor, user, {
+                        'name': region,
+                        'country_id': country.id,
+                        'code': code,
+                    }, context=context
+                )
+	    else:
+		if not region:
+			error = 'There is no State Mapping. This order cannot import'
+		elif not country:
+		    error = 'There is no Country. This order cannot import'
+		else:
+		    error = 'There is no State Code. This order cannot import'
+
+                raise osv.except_osv(
+                    _('Address Country/State Mapping Error'),
+                    _(error)
+                )
         return self.browse(cursor, user, state_id, context=context)
