@@ -18,6 +18,10 @@ class ProductTemplate(osv.osv):
     _inherit = 'product.template'
 
     _columns = {
+	'sync_stock': fields.boolean('Sync Stock'),
+        'always_in_stock': fields.boolean('Always in Stock'),
+        'manage_stock': fields.boolean('Manage Stock'),
+        'use_config_manage_stock': fields.boolean('Use Config Manage Stock'),
 	'shipping_product': fields.boolean('Shipping Product', help="Used to create totals like Magento"),
 	'set': fields.many2one('product.attribute.set', 'Attribute Set'),
 	'short_description': fields.text('Short Descripton'),
@@ -53,7 +57,6 @@ class ProductTemplate(osv.osv):
 				       ('virtual', 'Virtual'),
         ], 'Mage Product Type'),
 	'url_key': fields.char('URL Key'),
-	'mage_manage_stock': fields.boolean('Manage Stock'),
 	'external_id': fields.integer('External Id', select=True, copy=False),
 	'sync_to_mage': fields.boolean('Magento Sync', copy=False),
         'super_attributes': fields.many2many('product.attribute',

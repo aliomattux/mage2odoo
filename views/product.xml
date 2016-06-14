@@ -91,16 +91,22 @@
 			    <field name="external_id" />
 			    <field name="mage_tax_class" />
 			    <field name="shipping_product" />
-			    <field name="mage_manage_stock" />
 			    <field name="img_path" />
 			    <field name="url_path" />
 		        </group>
-			<group string="Stuff">
+			<group string="Status">
 			    <field name="visibility" />
 			    <field name="mage_status" />
 			    <field name="url_key" />
 			</group>
 			<newline/>
+                        <group string="Stock" >
+                            <field name="sync_stock" />
+                            <field name="always_in_stock" attrs="{'invisible': [('sync_stock', '!=', True)]}"/>
+                            <field name="manage_stock" attrs="{'invisible': [('sync_stock', '!=', True)]}"/>
+                            <field name="use_config_manage_stock" attrs="{'invisible': [('sync_stock', '!=', True)]}"/>
+                        </group>
+                        <newline/>
 			<separator string="Categories" colspan="4" />
 			<field name="categories" colspan="4" nolabel="1" />
                         <newline/>
