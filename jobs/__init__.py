@@ -9,3 +9,4 @@ import partner
 import links
 import grouped_relation
 import users
+import update_status

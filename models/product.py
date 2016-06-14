@@ -227,7 +227,10 @@ class ProductProduct(osv.osv):
 
 
     def sync_one_image(self, cr, uid, job, product_id, record, img_url):
-	image_path = record.get('image')
+	image_path = record.get('thumbnail')
+	if not image_path:
+	    image_path = record.get('small_image')
+
 	if not image_path or image_path == 'no_selection':
 	    return True
 
