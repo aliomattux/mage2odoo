@@ -229,7 +229,22 @@ class SaleOrder(osv.osv):
         line_data = []
         for item in order['items']:
 
-	    if item['product_type'] == 'simple' or not item['product_type']:
+           if item['product_type'] in ['simple', 'grouped'] or not item['product_type']:
+                product = product_obj.get_or_create_odoo_record(
+                     cr, uid, job, item['product_id'], item=item)
+
+               #Should get the price if it exists only on the configurable
+               price = item['price']
+               if not price or price == '0.0000':
+                   if item.get('parent_item_id'):
+                       for parent in order['items']:
+                           if parent['item_id'] == item.get('parent_item_id'):
+                               price = parent['price']
+                               tax_percent = parent.get('tax_percent')
+                               if rates and tax_percent and float(tax_percent) > 0.001:
+                                   taxes = self.get_mage_taxes(cr, uid, rates, parent)
+
+                               break
 
 		try:
 		    product = product_obj.get_or_create_odoo_record(
@@ -245,16 +260,19 @@ class SaleOrder(osv.osv):
 			% order['increment_id'])
                 values = {
                     'name': item['name'] or item['sku'],
-                    'price_unit': float(item['price']),
+                    'price_unit': float(price),
 		    'product_uom': product.uom_id.id,
+		    'product_uos': product.uos_id.id,
+		    'product_uos_qty': float(item['qty_ordered']),		    
                     'product_uom_qty': float(item['qty_ordered']),
-                  #  'magento_notes': item['product_options'],
 		    'product_id': product.id,
                 }
 
-		tax_percent = item.get('tax_percent')
-                if rates and tax_percent and float(tax_percent) > 0.001:
+                if not taxes and rates and tax_percent and float(tax_percent) > 0.001:
                     taxes = self.get_mage_taxes(cr, uid, rates, item)
+                    values['tax_id'] = [(6, 0, taxes)]
+
+                elif taxes:
                     values['tax_id'] = [(6, 0, taxes)]
 
                 line_data.append((0, 0, values))
