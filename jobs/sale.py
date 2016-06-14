@@ -107,7 +107,6 @@ class MageIntegrator(osv.osv_memory):
 
 	order_basket = []
 	order_ids = [x['increment_id'] for x in order_data]
-
 	for id in order_ids:
 	    new_val = "('" + id + "')"
 	    order_basket.append(new_val)
@@ -137,13 +136,12 @@ class MageIntegrator(osv.osv_memory):
 	    if not orders:
 	        continue
 
-	    for order in orders:
 		#TODO: Add proper logging and debugging
 	        order_obj = self.pool.get('sale.order')
 	        order_ids = order_obj.search(cr, uid, [('mage_order_number', '=', order['increment_id'])])
 	        if order_ids:
-		    if not skip_status:
-		        status = self.set_one_order_status(cr, uid, job, order, 'imported', 'Order Imported')
+#		    if not skip_status:
+#		        status = self.set_one_order_status(cr, uid, job, order, 'imported', 'Order Imported')
 
 		    print 'Skipping existing order %s' % order['increment_id']
 		    continue
@@ -154,10 +152,20 @@ class MageIntegrator(osv.osv_memory):
 
 	        try:
 	            sale_order = self.process_one_order(cr, uid, job, order, storeview, payment_defaults, defaults, integrity_product, mappinglines)
+
+		    if order.get('relation_parent_id') and order.get('increment_id')[-2:] == '-1':
+			to_cancel_ids = self.pool.get('sale.order').search(cr, uid, [('external_id', '=', order['relation_parent_id'])])
+			if to_cancel_ids:
+			    for cancel_order in self.pool.get('sale.order').browse(cr, \
+				uid, to_cancel_ids
+				):
+				self.cancel_one_order(cr, uid, job, cancel_order, sale_order)
+				
 		    #Implement something to auto approve if configured
 #		    sale_order.action_button_confirm()
 
 	        except Exception, e:
+		    print 'Exception', e
 		    exception_obj.create(cr, uid, {
 						'external_id': order['increment_id'],
 						'message': str(e),
@@ -169,7 +177,7 @@ class MageIntegrator(osv.osv_memory):
 		    continue
 
 		if not skip_status:
-		    status = self.set_one_order_status(cr, uid, job, order, 'imported', 'Order Imported')
+		    status = self.set_one_order_status(cr, uid, job, order, 'o_complete', 'Order Imported')
 		    if not status:
 		        print 'Created order but could not notify Magento'
 
@@ -204,3 +212,45 @@ class MageIntegrator(osv.osv_memory):
 	except Exception, e:
 	    print 'Status Exception', e
 	    return False
+
+
+    def confirm_one_order(cr, uid, sale):
+	#What all steps can this apply to
+	if sale.state == 'draft':
+	    sale.action_button_confirm()
+	    
+
+
+
+    def cancel_one_order(self, cr, uid, job, sale, new_sale):
+	exception_obj = self.pool.get('mage.import.exception')
+        cant_process = False
+        if sale.picking_ids:
+            print 'This order has pickings'
+            for picking in sale.picking_ids:
+                if picking.state == 'done':
+                    cant_process = True
+                    print 'This order cannot be canceled'
+                    break
+
+                if picking.state in ['partially_available', 'assigned']:
+                    picking_obj.do_unreserve(cr, uid, picking.id)
+                    picking_obj.action_cancel(cr, uid, picking.id)
+                else:
+                    picking_obj.action_cancel(cr, uid, picking.id)
+                picking_obj.unlink(cr, uid, picking.id)
+        if cant_process:
+            exception_obj.create(cr, uid, {
+                'external_id': order.external_id,
+                'message': 'This order cannot be canceled because at least one of its picking is done',
+                'data': """{'order': %s, 'reason': %s}""" % (sale.increment_id, 'Picking already done'),
+                'type': 'Sale Order',
+                'job': job.id,
+            })
+
+        sale_obj.action_cancel(cr, uid, sale.id)
+	if new_sale:
+	    sale_obj.write(cr, uid, new_sale, {'canceled_order_failed': cant_process, \
+		'canceled_sale_order': sale.id})
+
+        return True
