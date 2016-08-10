@@ -22,6 +22,7 @@
 	     'views/delivery.xml',
 	     'views/partner.xml',
 	     'views/exception.xml',
+	     'views/amazon.xml',
 	     'data/mage_shipping.xml',
     ],
     'test': [

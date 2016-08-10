@@ -127,6 +127,9 @@
 			    <field name="last_import_datetime" />
 			    <field name="last_export_datetime" />
 			</group>
+			<group string="Manual Order Import">
+			    <field name="manual_order_number" />
+			</group>
                     </sheet>
                 </form>
             </field>

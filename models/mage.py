@@ -170,6 +170,7 @@ class MageStoreView(osv.osv):
     _name = 'mage.store.view'
     _columns = {
         'name': fields.char('Name'),
+	'manual_order_number': fields.char('Manual Order Number'),
 	'store': fields.many2one('mage.store.group', 'Store Group'),
 	'code': fields.char('Code'),
 	'website': fields.many2one('mage.website', 'Website'),

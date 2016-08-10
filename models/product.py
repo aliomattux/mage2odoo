@@ -34,6 +34,7 @@ class ProductTemplate(osv.osv):
 	),
         'mage_tax_class': fields.many2one('product.attribute.value', 'Mage Tax Class',
                 domain="[('attribute_code', '=', 'tax_class_id')]"),
+	'special_price': fields.float('Special Price'),
 	'visibility': fields.selection([
 					('1', 'Not Visible Individually'),
 					('2', 'Catalog'),
@@ -227,7 +228,10 @@ class ProductProduct(osv.osv):
 
 
     def sync_one_image(self, cr, uid, job, product_id, record, img_url):
-	image_path = record.get('image')
+	image_path = record.get('thumbnail')
+	if not image_path:
+	    image_path = record.get('small_image')
+
 	if not image_path or image_path == 'no_selection':
 	    return True
 

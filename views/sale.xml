@@ -21,6 +21,7 @@
 		<field name="partner_id" position="after" >
 		    <field name="order_email" />
 		    <field name="mage_store" />
+		    <field name="mage_custom_status" />
 		</field>
 	    </field>
 	</record>
@@ -33,6 +34,7 @@
                 <field name="partner_id" position="after" >
                     <field name="order_email" />
                     <field name="mage_store" />
+                    <field name="mage_custom_status" />
                 </field>
             </field>
         </record>
@@ -42,14 +44,15 @@
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="payment_method.view_sale_billing_form" />
             <field name="arch" type="xml">
-                <button name="invoice_recreate" position="before" >
+<!--                <button name="invoice_recreate" position="before" >
                     <button name="create_mage_sale_order" type="object" string="Create Magento Order" />
-               </button>
+               </button> -->
 		<field name="partner_invoice_id" position="replace" />
 		<field name="partner_shipping_id" position="replace" />
 		<field name="partner_id" position="replace">
 		    <field name="partner_id" on_change="onchange_sale_partner_id(partner_id, context)" domain="[('parent_id', '=', False)]" context="{'search_default_customer':1}" options='{"always_reload": True}'/>
 		    <field name="order_email" />
+                    <field name="mage_custom_status" />
 		</field>
 		<group name="payment" position="inside" >
 		    <field name="mage_invoice_complete" attrs="{'invisible': [('mage_store', '=', False)]}"/>
@@ -174,7 +177,7 @@
 	    <field name="view_mode">tree,form,calendar,graph</field>
 	    <field name="search_view_id" ref="sale.view_sales_order_filter"/>
 	    <field name="context">{}</field>
-	    <field name="domain">[('state', 'not in', ('draft', 'sent', 'cancel'))]</field>
+	    <field name="domain">[('state', 'not in', ('draft', 'sent', 'cancel')),('amazon_process', '=', False)]</field>
 	    <field name="help" type="html">
 	      <p class="oe_view_nocontent_create">
 	      Click to create a quotation that can be converted into a sales

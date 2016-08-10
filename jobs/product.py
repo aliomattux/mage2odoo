@@ -112,7 +112,7 @@ class MageIntegrator(osv.osv_memory):
 
 
     def import_products(self, cr, uid, job, product_ids, link, context=None):
-	datas = [product_ids[i:i+5] for i in range(0, len(product_ids), 5)]
+	datas = [product_ids[i:i+500] for i in range(0, len(product_ids), 500)]
         mappinglines = self._get_mappinglines(cr, uid, job.mapping.id)
 
 	for data in datas:

@@ -5,7 +5,10 @@ from pprint import pprint as pp
 class SaleOrder(osv.osv):
     _inherit = 'sale.order'
     _columns = {
+	'amazon_process': fields.boolean('Amazon Process', help="Technical field"),
 	'mage_store': fields.many2one('mage.store.view', 'Magento Store'),
+	'canceled_sale_order': fields.many2one('sale.order'),
+	'canceled_order_failed': fields.boolean('Original Sale Not Canceled'),
 	'mage_cart_id': fields.integer('Magento Cart ID'),
 	'order_email': fields.char('Magento Email', readonly=True),
 	'ip_address': fields.char('IP Address'),
@@ -89,7 +92,7 @@ class SaleOrder(osv.osv):
         if record['total_paid'] == record['grand_total'] or \
 		record['total_due'] == '0.0000' and record['state'] == 'complete':
 	    vals['mage_invoice_complete'] = True
-	    vals['mage_order_prepaid'] = True
+#	    vals['mage_order_prepaid'] = True
 	    #Find effective way to determine paid date
 	    vals['mage_paid_date'] = record['created_at']
 	    vals['mage_paid_total'] = record['total_paid']
@@ -103,8 +106,7 @@ class SaleOrder(osv.osv):
 	if record['state'] in ['canceled', 'closed']:
 	    vals['state'] = 'cancel'
 
-	if record['state'] == 'complete':
-	    vals['mage_shipment_complete'] = True
+	vals['mage_shipment_complete'] = True
 
 	return vals
 	    
@@ -144,6 +146,8 @@ class SaleOrder(osv.osv):
 	    rates = False
 
         vals = {
+		'mage_shipment_code': record['shipping_description'],
+		'mage_custom_status': record['status'],
 		'mage_order_status': record['state'],
                 'mage_order_number': record['increment_id'],
 #               'order_policy':
@@ -180,7 +184,8 @@ class SaleOrder(osv.osv):
             })
 
 	#Payment and order totals
-	vals.update(self.get_mage_payment_details(cr, uid, job, record, payment_defaults))
+	payment_vals = self.get_mage_payment_details(cr, uid, job, record, payment_defaults)
+	vals.update(payment_vals)
 
         if record['shipping_method']:
 	    shipping_record = {'code': record['shipping_method'], 
@@ -244,6 +249,7 @@ class SaleOrder(osv.osv):
                     'price_unit': float(item['price']),
 		    'product_uom': product.uom_id.id,
                     'product_uom_qty': float(item['qty_ordered']),
+#                    'product_uom_qty': float(item['qty_shipped']),
                   #  'magento_notes': item['product_options'],
 		    'product_id': product.id,
                 }
@@ -352,10 +358,11 @@ class SaleOrder(osv.osv):
 	if taxes['all'] == round(tax_amount, 2):
 	    all_tax = True
 
-	for tax in taxes['rates']:
-
-	    if not all_tax and tax['percent'] != item_data['tax_percent']:
-		continue
+#	for tax in taxes['rates']:
+	tax = taxes['rates'][0]
+	if True:
+#	    if not all_tax and tax['percent'] != item_data['tax_percent']:
+#		    continue
 
             tax_name = tax['title']
             tax_code = tax['code']
