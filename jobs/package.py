@@ -16,6 +16,7 @@ class MageIntegrator(osv.osv_memory):
 		if package.picking.sale.mage_shipment_complete and package.picking.external_id:
 		    result = self.send_one_package(cr, uid, job, package.picking.external_id, package, True)
 		    package.mage_package_state = 'done'
+		    package.picking.sw_exp = False
 		    cr.commit()
 		else:
 		    shipping_id = self.send_one_package(cr, uid, job, package.picking.sale.mage_order_number, package, False)
@@ -24,7 +25,11 @@ class MageIntegrator(osv.osv_memory):
 			package.picking.mage_export_error = False
 			package.mage_package_state = 'done'
 			if not package.picking.sale.mage_shipment_complete:
-			    package.picking.sale.mage_shipment_complete = True
+			    sale = package.picking.sale
+			    sale.mage_shipment_complete = True
+			    #Ensure Sale is not needlessly updated and report to shipworks
+			    sale.mage_custom_status = 'complete'
+			    package.picking.sw_exp = False
 
 		    else:
 			package.mage_package_state = 'exception'
@@ -49,8 +54,6 @@ class MageIntegrator(osv.osv_memory):
 
 
     def send_one_package(self, cr, uid, job, incrementid, package, track_only):
-	#This is yucky business
-#	base_carrier = package.picking.carrier_id.mage_carrier
 	if package.tracking_number[0:3] == '1Z':
 	    base_carrier = 'ups'
 	else:

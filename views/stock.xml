@@ -6,9 +6,9 @@
 	    <field name="model">stock.picking</field>
 	    <field name="inherit_id" ref="stock.view_picking_form" />
 	    <field name="arch" type="xml">
-		<field name="state" position="before" >
+<!--		<field name="state" position="before" >
 		    <button name="reset_to_draft" type="object" string="Uncommit" attrs="{'invisible': [('state', 'in', ('draft', 'done'))]}"/>
-		</field>
+		</field>-->
 		<field name="date_done" position="replace" />
 		<field name="min_date" position="after" >
 		    <field name="date_done" string="Date Done" />

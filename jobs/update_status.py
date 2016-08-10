@@ -77,7 +77,7 @@ class MageIntegrator(osv.osv_memory):
 
 
                 elif mage_status == 'canceled' and sale.state != 'cancel':
-                    self.mage_status_canceled(cr, uid, sale)
+                    self.mage_status_canceled(cr, uid, job, sale)
 
 
                 #RULE 4 - If the order is complete in Magento but is not detected as shipped in Odoo
@@ -87,19 +87,26 @@ class MageIntegrator(osv.osv_memory):
         return True
 
 
-    def mage_status_canceled(self, cr, uid, sale, context=None):
+    def mage_status_canceled(self, cr, uid, job, sale, context=None):
         return self.cancel_one_order(cr, uid, job, sale, False)
 
 
     def mage_status_complete(self, cr, uid, sale, context=None):
+	sale_obj = self.pool.get('sale.order')
+	picking_obj = self.pool.get('stock.picking')
+
         if sale.state == 'draft':
+            self.confirm_one_order(cr, uid, sale)
+
+        if sale.state == 'cancel':
+            sale.state = 'draft'
             self.confirm_one_order(cr, uid, sale)
 
         for picking in sale.picking_ids:
             if picking.state == 'done':
                 continue
 
-            if picking.state != 'cancel'
+            if picking.state == 'cancel':
                 picking_obj.picking_reset_to_draft(cr, uid, picking)
                 
             if picking.state == 'draft':
@@ -139,7 +146,7 @@ class MageIntegrator(osv.osv_memory):
                 if picking.state in ['partially_available', 'assigned']:
                     picking_obj.do_unreserve(cr, uid, picking.id)
 
-                if picking.state != 'cancel'
+                if picking.state != 'cancel':
                     picking_obj.action_cancel(cr, uid, picking.id)
 
                 picking_obj.picking_reset_to_draft(cr, uid, picking)
@@ -153,6 +160,7 @@ class MageIntegrator(osv.osv_memory):
 
 
     def mage_status_changed(self, cr, uid, sale, mage_status, context=None):
+	picking_obj = self.pool.get('stock.picking')
         sale.mage_custom_status = mage_status
         picking_ids = picking_obj.search(cr, uid, [('sale', '=', sale.id)])
         if picking_ids:
@@ -161,7 +169,7 @@ class MageIntegrator(osv.osv_memory):
 
     def mage_unhold_order(self, cr, uid, sale, mage_status):
         if sale.state == 'draft':
-            self.pool.get('sale.order').confirm_one_order(cr, uid, sale)
+            self.confirm_one_order(cr, uid, sale)
 
         for picking in sale.picking_ids:
             if picking.state == 'draft':
