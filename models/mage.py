@@ -173,6 +173,7 @@ class MageStoreView(osv.osv):
     _name = 'mage.store.view'
     _columns = {
         'name': fields.char('Name'),
+	'manual_order_number': fields.char('Manual Order Number'),
 	'store': fields.many2one('mage.store.group', 'Store Group'),
 	'code': fields.char('Code'),
 	'website': fields.many2one('mage.website', 'Website'),
@@ -193,6 +194,7 @@ class MageStoreView(osv.osv):
 	'import_orders_start_datetime': fields.datetime('Import Orders from This Time'),
 	'import_orders_end_datetime': fields.datetime('Import Orders To This Time'),
 	'warehouse': fields.many2one('stock.warehouse', 'Warehouse'),
+	'fba_warehouse': fields.many2one('stock.warehouse', 'FBA Warehouse'),
 	'last_import_datetime': fields.datetime('Last Imported At'),
 	'last_export_datetime': fields.datetime('Last Exported At'),
 	'order_prefix': fields.char('Order Prefix'),

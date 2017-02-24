@@ -45,7 +45,6 @@
 		    <field name="company" />
 		</field>
 <!--		<field name="mobile" position="after">
-		    <field name="external_address_id" />
 		</field> -->
 	    </field>
 	</record>
@@ -76,7 +75,6 @@
 			</group>
 			<group string="References">
 			    <field name="external_id" />
-			    <field name="external_address_id" />
 			</group>
 		    </page>
 		</page>

@@ -27,6 +27,7 @@ class ProductTemplate(osv.osv):
 	'shipping_product': fields.boolean('Shipping Product', help="Used to create totals like Magento"),
 	'set': fields.many2one('product.attribute.set', 'Attribute Set'),
 	'short_description': fields.text('Short Descripton'),
+	'msrp': fields.float('MSRP'),
 	'img_path': fields.char('Image Path'),
 	'url_path': fields.char('URL Path'),
 	'categories': fields.many2many('product.category', 'mage_product_categories_rel', \
@@ -40,6 +41,7 @@ class ProductTemplate(osv.osv):
 	),
         'mage_tax_class': fields.many2one('product.attribute.value', 'Mage Tax Class',
                 domain="[('attribute_code', '=', 'tax_class_id')]"),
+	'special_price': fields.float('Special Price'),
 	'visibility': fields.selection([
 					('1', 'Not Visible Individually'),
 					('2', 'Catalog'),
@@ -77,6 +79,7 @@ class ProductProduct(osv.osv):
 
     _sql_constraints = [('default_code_uniq', 'unique (default_code)', 'The SKU must be unique!')]
 
+<<<<<<< HEAD
     def button_create_product_in_magento(self, cr, uid, ids, context=None):
 	for product_id in ids:
 	    self.push_shell_product_to_mage(cr, uid, product_id)
@@ -96,9 +99,18 @@ class ProductProduct(osv.osv):
 	job_obj.create_one_mage_product(cr, uid, product, vals)
 
 
+    def sql_product_search(self, cr, uid, default_code):
+	query = "SELECT id FROM product_product WHERE default_code = '%s'" % default_code
+	cr.execute(query)
+	results = cr.fetchall()
+	product_ids = [res[0] for res in results]
+	return product_ids
+
+
     def get_or_create_special_product_vals(self, cr, uid, item, context=None):
 
-	product_ids = self.search(cr, uid, [('default_code', '=', item['sku'])])
+#	product_ids = self.search(cr, uid, [('default_code', '=', item['sku'])])
+	product_ids = self.sql_product_search(cr, uid, item['sku'])
 	if product_ids:
 	    return self.browse(cr, uid, product_ids[0])
 
@@ -121,7 +133,8 @@ class ProductProduct(osv.osv):
 
         product_id = self.get_mage_record(cr, uid, external_id)
 	if not product_id and item:
-	    product_ids = self.search(cr, uid, [('default_code', '=', item['sku'])])
+	    product_ids = self.sql_product_search(cr, uid, item['sku'])
+	   # product_ids = self.search(cr, uid, [('default_code', '=', item['sku'])])
 	    if product_ids:
 		product_id = product_ids[0]
 
@@ -163,10 +176,13 @@ class ProductProduct(osv.osv):
 
         vals = {
 		'active': True,
-		'img_path': get_url,
-#		'standard_price': record.get('cost'),
-#		'upc': record.get('upc'),
-#		'list_price': record.get('price'),
+		'weight': record.get('weight'),
+		'standard_price': record.get('cost'),
+		'upc': record.get('upc'),
+		'special_price': record.get('special_price'),
+		'msrp': record.get('msrp'),
+		'manufacturer': record.get('manufacturer'),
+		'list_price': record.get('price'),
                 'description': record.get('description', ' '),
                 'mage_status': record['status'],
 #                'name': record['name'],
@@ -255,7 +271,8 @@ class ProductProduct(osv.osv):
 
         existing_id = self.get_mage_record(cr, uid, vals['external_id'])
         if not existing_id and vals.get('default_code'):
-	    existing_id = self.search(cr, uid, [('default_code', '=', vals['default_code'])])
+	    existing_id = self.sql_product_search(cr, uid, vals['default_code'])
+#	    existing_id = self.search(cr, uid, [('default_code', '=', vals['default_code'])])
         if existing_id:
             self.write(cr, uid, existing_id, vals)
             return existing_id

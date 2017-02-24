@@ -25,12 +25,13 @@ class MageIntegrator(osv.osv_memory):
 	    print e
 	    html = 'Alert! The Magento to Odoo Update job has failed.'
             recipients_data = [
-                {'name': 'Email', 'email': 'email@email.com'},
+                {'name': 'Person Name', 'email': 'no_email@noemail.com'},
+                {'name': 'Peson Name', 'email': 'no_email@noemail.com'},
             ]
 
-            sender = 'alerts@odoo.odoo.com'
+            sender = 'alerts@website.com'
             subject = 'Update Script Alert'
-            from_mail = "Alerts <alerts@odoo.odoo.com>"
+            from_mail = "Alerts <alerts@integration.com>"
 	    self.send_error_notification(html, recipients_data, sender, subject, from_mail)
 
 	return True

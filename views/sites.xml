@@ -110,6 +110,7 @@
 			<group string="Settings" colspan="4">
 			    <field name="order_prefix" />
 			    <field name="warehouse" required="1" />
+			    <field name="fba_warehouse" required="1" />
 			    <field name="picking_policy" />
 			    <field name="invoice_policy" />
 			    <field name="skip_order_status" />
@@ -126,6 +127,9 @@
 			    <field name="import_orders_end_datetime" />
 			    <field name="last_import_datetime" />
 			    <field name="last_export_datetime" />
+			</group>
+			<group string="Manual Order Import">
+			    <field name="manual_order_number" />
 			</group>
                     </sheet>
                 </form>

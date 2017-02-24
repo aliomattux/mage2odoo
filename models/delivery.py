@@ -8,6 +8,8 @@ class DeliveryCarrier(osv.osv):
 	'display_in_ui': fields.boolean('Display in Searches'),
 	'mage_code': fields.char('Magento ID', select=True, copy=False),
 	'mage_carrier_code': fields.char('Magento Carrier Code'),
+	'channel_name': fields.char('Channel Name'),
+	'channel_color': fields.char('Channel Color'),
 	'mage_carrier': fields.selection([('ups', 'UPS'),
 					  ('usps', 'USPS'),
 					  ('fedex', 'FedEx'),
