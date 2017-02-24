@@ -1,13 +1,21 @@
 from openerp.osv import osv, fields
 from pprint import pprint as pp
 from openerp.tools.translate import _
-from datetime import datetime
+from datetime import datetime, timedelta
 
 DEFAULT_STATUS_FILTERS = ['processing']
 
 class MageIntegrator(osv.osv_memory):
 
     _inherit = 'mage.integrator'
+
+    def check_fba_order(self, cr, uid, record):
+        #check if this is an FBA order
+        if record.get('shipping_description') and 'Amazon' in record.get('shipping_description') \
+		and 'Std Cont US' not in record.get('shipping_description'):
+	    return True
+
+	return False
 
 
     def import_sales_orders(self, cr, uid, job, context=None):
@@ -34,7 +42,11 @@ class MageIntegrator(osv.osv_memory):
 
 	for storeview in storeview_obj.browse(cr, uid, store_ids):
 	    self.import_one_storeview_orders(cr, uid, job, instance, storeview, payment_defaults, defaults, mappinglines)
-	    storeview_obj.write(cr, uid, storeview.id, {'last_import_datetime': datetime.utcnow()})
+	    if storeview.manual_order_number:
+		storeview_obj.write(cr, uid, storeview.id, {'manual_order_number': False})
+	    else:
+	        storeview_obj.write(cr, uid, storeview.id, {'last_import_datetime': datetime.utcnow() - timedelta(hours=5)})
+
 	    cr.commit()
 
 	return True
@@ -42,7 +54,7 @@ class MageIntegrator(osv.osv_memory):
 
     def import_one_storeview_orders(self, cr, uid, job, instance, storeview, payment_defaults, defaults, mappinglines=False, context=None):
 	start_time = False
-
+	picking_obj = self.pool.get('stock.picking')
 	exception_obj = self.pool.get('mage.import.exception')
 
         if not storeview.warehouse:
@@ -97,11 +109,13 @@ class MageIntegrator(osv.osv_memory):
 	#Make the external call and get the order ids
 	#Calling info is really inefficient because it loads data we dont need
 	print 'Getting Order Data'
+
+	if storeview.manual_order_number:
+	    filters = {'increment_id': {'=': storeview.manual_order_number}}
+
 	order_data = self._get_job_data(cr, uid, job, 'sales_order.search', [filters])
 
 	if not order_data:
-	    print 'No Order Data'
-	    print 'filters', filters
 	    return True
 
 	#The following code needs a proper implementation,
@@ -110,12 +124,15 @@ class MageIntegrator(osv.osv_memory):
 
 	order_basket = []
 	order_ids = [x['increment_id'] for x in order_data]
+#	order_ids = ['10042648']
+
 	for id in order_ids:
 	    new_val = "('" + id + "')"
 	    order_basket.append(new_val)
 
 	val_string = ','.join(order_basket)
-
+	if not val_string:
+	    return True
 	query = """WITH increments AS (VALUES %s) \
 		SELECT column1 FROM increments \
 		LEFT OUTER JOIN sale_order ON \
@@ -141,7 +158,24 @@ class MageIntegrator(osv.osv_memory):
 		print 'No Orders'
 	        continue
 
+	    skip_items = ['ggmnotship', 'ggmnoship', 'ggmdropship', 'ggmrma']
 	    for order in orders:
+		skip_order = False
+		#GG mod, skip certain orders
+		for i in order['items']:
+		    if i.get('sku') and i.get('sku').lower() in skip_items:
+			skip_order = True
+			break
+
+		if skip_order:
+		    continue
+#		    print 'Marketplace Order'
+#		    try:
+#		        status = self.set_one_order_status(cr, uid, job, order, 'o_complete', 'Marketplace Order')
+#			continue
+#		    except Exception, e:
+#			continue
+		
 		#TODO: Add proper logging and debugging
 	        order_obj = self.pool.get('sale.order')
 	        order_ids = order_obj.search(cr, uid, [('mage_order_number', '=', order['increment_id'])])
@@ -149,7 +183,7 @@ class MageIntegrator(osv.osv_memory):
 #		    if not skip_status:
 #		        status = self.set_one_order_status(cr, uid, job, order, 'imported', 'Order Imported')
 
-		    print 'Skipping existing order %s' % order['increment_id']
+#		    print 'Skipping existing order %s' % order['increment_id']
 		    continue
 
 		#Assign guest checkout orders to odoo customer if applicable
@@ -158,7 +192,54 @@ class MageIntegrator(osv.osv_memory):
 
 	        try:
 	            sale_order = self.process_one_order(cr, uid, job, order, storeview, payment_defaults, defaults, integrity_product, mappinglines)
-		    sale_order.action_button_confirm()
+#		    sale_order.action_button_confirm()
+		    fba_order = self.check_fba_order(cr, uid, order)
+		    if fba_order:
+			self.confirm_one_order(cr, uid, sale_order)
+			self.mage_status_complete(cr, uid, sale_order)
+
+#		    if order['status'] not in ['pending', 'new', 'complete']:
+#		        #All orders must go to Shipworks
+#		        self.confirm_one_order(cr, uid, sale_order)
+
+		    #If the order is complete upon import, decrement inventory immediately
+		    if order['status'] == 'complete':
+			picking_ids = picking_obj.search(cr, uid, [('sale', '=', sale_order.id)])
+			if picking_ids:
+			    for picking in picking_obj.browse(cr, uid, picking_ids):
+				if picking.state == 'draft':
+				    picking_obj.action_confirm(cr, uid, [picking.id], context=context)
+				if picking.state != 'assigned':
+                                    picking_obj.force_assign(cr, uid, [picking.id])
+                                picking.do_transfer()
+			else:
+                            self.confirm_one_order(cr, uid, sale_order)
+                            self.mage_status_complete(cr, uid, sale_order)
+#		    if order['status'] in ['pending', 'new']:
+ #                       picking_ids = picking_obj.search(cr, uid, [('sale', '=', sale_order.id)])
+  #                      if picking_ids:
+#			    sale.state = 'manual'
+ #                           for picking in picking_obj.browse(cr, uid, picking_ids):
+#				if picking.state == 'done':
+#				    continue
+ #                               if picking.state in ['partially_available', 'assigned']:
+  #                                  picking_obj.do_unreserve(cr, uid, picking.id)
+#
+ #                               picking_obj.action_cancel(cr, uid, picking.id)
+  #                              picking.reset_picking_draft()
+   #                             procurement_obj = self.pool.get('procurement.order')
+    #                            procurement_ids = procurement_obj.search(cr, uid, [('group_id', '=', picking.group_id.id)])
+     #                           if procurement_ids:
+      #                              procurement_obj.write(cr, uid, procurement_ids, {'state': 'confirmed'})
+#
+#				picking_obj.write(cr, uid, [picking.id], {'sw_exp': False})
+
+		    #Check if this order is subject to special conditions (Grow Green)
+		    amazon = self.identify_amazon_order(cr, uid, order)
+		    if amazon:
+			order_obj.write(cr, uid, sale_order.id, {'amazon_process': True})
+
+		    #Check if the order is a child of a canceled order
 		    if order.get('relation_parent_id') and order.get('increment_id')[-2:] == '-1':
 			to_cancel_ids = self.pool.get('sale.order').search(cr, uid, [('external_id', '=', order['relation_parent_id'])])
 			if to_cancel_ids:
@@ -167,6 +248,8 @@ class MageIntegrator(osv.osv_memory):
 				):
 				self.cancel_one_order(cr, uid, job, cancel_order, sale_order)
 				
+		    #Implement something to auto approve if configured
+#		    sale_order.action_button_confirm()
 
 	        except Exception, e:
 		    print 'Exception', e
@@ -203,6 +286,7 @@ class MageIntegrator(osv.osv_memory):
 	if mappinglines:
             vals.update(self._transform_record(cr, uid, job, order, 'from_mage_to_odoo', mappinglines))
 
+	vals['order_policy'] = 'manual'
 	sale_order = order_obj.create(cr, uid, vals)
         return order_obj.browse(cr, uid, sale_order)
 
@@ -218,7 +302,7 @@ class MageIntegrator(osv.osv_memory):
 	    return False
 
 
-    def confirm_one_order(cr, uid, sale):
+    def confirm_one_order(self, cr, uid, sale):
 	#What all steps can this apply to
 	if sale.state == 'draft':
 	    sale.action_button_confirm()
@@ -229,6 +313,10 @@ class MageIntegrator(osv.osv_memory):
         cant_process = False
         if sale.picking_ids:
             print 'This order has pickings'
+
+	picking_obj = self.pool.get('stock.picking')
+	sale_obj = self.pool.get('sale.order')
+        if sale.picking_ids:
             for picking in sale.picking_ids:
                 if picking.state == 'done':
                     cant_process = True
@@ -241,14 +329,6 @@ class MageIntegrator(osv.osv_memory):
                 else:
                     picking_obj.action_cancel(cr, uid, picking.id)
                 picking_obj.unlink(cr, uid, picking.id)
-        if cant_process:
-            exception_obj.create(cr, uid, {
-                'external_id': order.external_id,
-                'message': 'This order cannot be canceled because at least one of its picking is done',
-                'data': """{'order': %s, 'reason': %s}""" % (sale.increment_id, 'Picking already done'),
-                'type': 'Sale Order',
-                'job': job.id,
-            })
 
         sale_obj.action_cancel(cr, uid, sale.id)
 	if new_sale:
@@ -256,3 +336,38 @@ class MageIntegrator(osv.osv_memory):
 		'canceled_sale_order': sale.id})
 
         return True
+
+		picking_obj.write(cr, uid, [picking.id], {'sw_exp': False, 'sw_pre_exp': False})
+#                picking_obj.unlink(cr, uid, picking.id)
+        if cant_process:
+            exception_obj.create(cr, uid, {
+                'external_id': sale.external_id,
+                'message': 'This order cannot be canceled because at least one of its pickings is done',
+                'data': """{'order': %s, 'reason': %s}""" % (sale.mage_order_number, 'Picking already done'),
+                'type': 'Sale Order',
+                'job': job.id,
+            })
+	    return True
+
+        sale_obj.action_cancel(cr, uid, sale.id)
+	if new_sale:
+	    sale_obj.write(cr, uid, new_sale.id, {'canceled_order_failed': cant_process, \
+		'canceled_sale_order': sale.id})
+
+        return True
+
+
+    def identify_amazon_order(self, cr, uid, order):
+	amazon = False
+	if order['status'] == 'Amazon_New':
+	    amazon = True
+	#Identify by order level
+#	if True:
+#	    amazon = True
+
+	#Identify at item level
+#	for product in order['items']:
+	    #Add check at line level
+#	    if True:
+#		amazon = True
+	return amazon

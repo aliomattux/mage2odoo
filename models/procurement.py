@@ -5,8 +5,8 @@ from openerp.osv import osv, fields
 class StockMove(osv.osv):
     _inherit = 'stock.move'
     _columns = {
-        'sale_price': fields.float('Original Sale Price'),
-        'sale_line_id': fields.many2one('sale.order.line', 'Sale Line ID'),
+	'sale_price': fields.float('Original Sale Price'),
+	'sale_line_id': fields.many2one('sale.order.line', 'Sale Line ID'),
     }
 
     def add_sale_vals(self, cr, uid, sale, context=None):
@@ -31,7 +31,13 @@ class StockMove(osv.osv):
                 location_from, location_to, context=context)
 
         moves = self.browse(cr, uid, move_ids)
-
+	for move in moves:
+            sale_line_id, price = self.find_sale_line_reference(cr, uid, move.product_id.id, move.procurement_id.sale_line_id.order_id.id)
+	    if not sale_line_id:
+		continue
+	    move.sale_line_id = sale_line_id
+	    move.sale_price = price
+	    
         if moves[0].procurement_id.sale_line_id:
 	    picking = moves[0].picking_id
 	    vals = self.add_sale_vals(cr, uid, moves[0].procurement_id.sale_line_id.order_id)

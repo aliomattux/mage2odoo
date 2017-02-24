@@ -78,7 +78,7 @@ class ResCountryState(osv.Model):
         """
         state_ids = self.search(
             cursor, user, [
-                ('name', 'ilike', region),
+                ('name', '=', region),
                 ('country_id', '=', country.id),
             ], context=context
         )

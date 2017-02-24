@@ -155,6 +155,8 @@ class MageIntegrator(osv.osv_memory):
 			'from_mage_to_odoo', mappinglines
 		)
 		vals.update(mapper_vals)
+	#	pp(vals)
+#		pp(record)
                 product_id = product_obj.upsert_mage_record(cr, uid, vals)
 
 	        if import_images:

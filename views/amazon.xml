@@ -1,0 +1,20 @@
+<openerp>
+    <data>
+	<record id="action_mage_amazon_processs" model="ir.actions.act_window">
+	    <field name="name">Amazon Orders</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="res_model">sale.order</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree,form,calendar,graph</field>
+	    <field name="domain">[('amazon_process', '=', True)]</field>
+	    <field name="search_view_id" ref="sale.view_sales_order_filter"/>
+	    <field name="context">{}</field>
+	</record>
+
+        <menuitem id="menu_mage_amazon_processs"
+                action="action_mage_amazon_processs" parent="base.menu_sales"
+                sequence="10"/>
+    </data>
+</openerp>
+
+

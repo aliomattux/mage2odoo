@@ -53,6 +53,9 @@
 		    <field name="sync_to_mage" />
 		    <label for="sync_to_mage"/>
 		</div>
+		<div name="options" position="after">
+		    <button name="%(asin_label.action_print_label_generator)d" type="action" string="Print Labels" />
+		</div>
 		<field name="description" position="replace" >
 		<separator string="Short/Detailed Description" colspan="4" />
 		<field name="short_description" nolabel="1" colspan="4"/>
@@ -77,6 +80,10 @@
 		    </group>
 		</label>
 
+		<field name="list_price" position="after" >
+		    <field name="special_price" />
+		    <field name="msrp" />
+		</field>
                 <xpath expr="//page[@string='Variants']" position="replace">
                     <page string="Associated Products" attrs="{'invisible': 
 			['|', ('mage_type', '!=', 'configurable'), ('sync_to_mage', '!=', True)]}" >

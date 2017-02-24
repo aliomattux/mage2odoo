@@ -1,0 +1,12 @@
+<openerp>
+    <data>
+<!--    <data noupdate="0"> -->
+
+    <record id="group_mage2odoo_manager" model="res.groups">
+        <field name="name">Mage2odoo Manager</field>
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    </data>
+</openerp>

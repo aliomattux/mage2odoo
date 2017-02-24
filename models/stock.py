@@ -10,3 +10,9 @@ class StockPicking(osv.osv):
         'shipping_city': fields.related('partner_id', 'city', type='char', string='Shipping City'),
         'mage_store': fields.related('sale', 'mage_store', type='many2one', relation='mage.store.view', string='Magento Store'),
     }
+
+
+
+class StockMove(osv.osv):
+    _inherit = 'stock.move'
+    _order = 'date desc'

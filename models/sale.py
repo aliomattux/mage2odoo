@@ -1,10 +1,17 @@
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from pprint import pprint as pp
+class SaleOrderLine(osv.osv):
+    _inherit = 'sale.order.line'
+    _columns = {
+	'mage_item_id': fields.char('Mage Item Id'),
+    }
 
 class SaleOrder(osv.osv):
     _inherit = 'sale.order'
     _columns = {
+	'amazon_process': fields.boolean('Amazon Process', help="Technical field"),
+	'department': fields.char('Department'),
 	'mage_store': fields.many2one('mage.store.view', 'Magento Store'),
         'paypal_transaction_id': fields.char('PayPal Transaction ID'),
         'paypal_buyer_email': fields.char('PayPal Buyer Email'),
@@ -97,6 +104,7 @@ class SaleOrder(osv.osv):
         if record['total_paid'] == record['grand_total'] or \
 		record['total_due'] == '0.0000' and record['state'] == 'complete':
 	    vals['mage_invoice_complete'] = True
+#	    vals['mage_order_prepaid'] = True
 	    #Find effective way to determine paid date
 	    vals['mage_paid_date'] = record['created_at']
 	    vals['mage_paid_total'] = record['total_paid']
@@ -112,7 +120,6 @@ class SaleOrder(osv.osv):
 
         if record['state'] == 'complete':
             vals['mage_shipment_complete'] = True
-
 
 	if record.get('payment') and record['payment'].get('additional_information'):
 	    pay_rec = record['payment']['additional_information']
@@ -160,7 +167,7 @@ class SaleOrder(osv.osv):
 	    rates = False
 
         vals = {
-		'mage_shipment_code': record['shipping_method'],
+		'mage_shipment_code': record['shipping_description'],
 		'mage_custom_status': record['status'],
 		'mage_order_status': record['state'],
                 'mage_order_number': record['increment_id'],
@@ -196,6 +203,11 @@ class SaleOrder(osv.osv):
                          'mage_store': storeview.id,
                          'warehouse_id': storeview.warehouse.id,
             })
+
+	    fba_order = self.pool.get('mage.integrator').check_fba_order(cr, uid, record)
+	    if fba_order:
+		if storeview.fba_warehouse:
+		    vals.update({'warehouse_id': storeview.fba_warehouse.id})
 
 	#Payment and order totals
 	payment_vals = self.get_mage_payment_details(cr, uid, job, record, payment_defaults)
@@ -281,6 +293,10 @@ class SaleOrder(osv.osv):
 		    'product_uos': product.uos_id.id,
 		    'product_uos_qty': float(item['qty_ordered']),		    
                     'product_uom_qty': float(item['qty_ordered']),
+		    'mage_item_id': item['item_id'],
+                    'product_uom_qty': float(item['qty_ordered']),
+#                    'product_uom_qty': float(item['qty_shipped']),
+                  #  'magento_notes': item['product_options'],
 		    'product_id': product.id,
                 }
 
@@ -390,10 +406,11 @@ class SaleOrder(osv.osv):
 	if taxes['all'] == round(tax_amount, 2):
 	    all_tax = True
 
-	for tax in taxes['rates']:
-
-	    if not all_tax and tax['percent'] != item_data['tax_percent']:
-		continue
+#	for tax in taxes['rates']:
+	tax = taxes['rates'][0]
+	if True:
+#	    if not all_tax and tax['percent'] != item_data['tax_percent']:
+#		    continue
 
             tax_name = tax['title']
             tax_code = tax['code']
