@@ -48,7 +48,7 @@
 	</record>
 
         <menuitem id="menu_mage_import_exceptions"
-                action="action_mage_import_exceptions" parent="base.menu_sales"
+                action="action_mage_import_exceptions" parent="menu_mage_jobs"
                 sequence="10"/>
     </data>
 </openerp>

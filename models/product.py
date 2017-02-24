@@ -16,8 +16,10 @@ PRODUCT_TYPES = {
 
 class ProductTemplate(osv.osv):
     _inherit = 'product.template'
-
     _columns = {
+	'msrp': fields.float('MSRP'),
+	'special_price': fields.float('Special Price'),
+	'mage_last_sync_date': fields.datetime('Last Mage Sync Date', copy=False),
 	'sync_stock': fields.boolean('Sync Stock'),
         'always_in_stock': fields.boolean('Always in Stock'),
         'manage_stock': fields.boolean('Manage Stock'),
@@ -75,6 +77,24 @@ class ProductProduct(osv.osv):
 
     _sql_constraints = [('default_code_uniq', 'unique (default_code)', 'The SKU must be unique!')]
 
+    def button_create_product_in_magento(self, cr, uid, ids, context=None):
+	for product_id in ids:
+	    self.push_shell_product_to_mage(cr, uid, product_id)
+
+	return True
+
+
+    def push_shell_product_to_mage(self, cr, uid, product_id, context=None):
+	job_obj = self.pool.get('mage.job')
+	product = self.browse(cr, uid, product_id)
+	vals = {
+	    'name': product.name,
+	    'set': product.set.external_id,
+	    'type': product.mage_type,
+	}
+
+	job_obj.create_one_mage_product(cr, uid, product, vals)
+
 
     def get_or_create_special_product_vals(self, cr, uid, item, context=None):
 
@@ -128,15 +148,28 @@ class ProductProduct(osv.osv):
 
     def prepare_odoo_record_vals(self, cr, uid, job, record, context=None):
 	set_obj = self.pool.get('product.attribute.set')
+	base_url = job.mage_instance.url
+	media_ext = 'media/catalog/product'
+	img_url = base_url + media_ext
+
+        image_path = record.get('thumbnail')
+        if not image_path:
+            image_path = record.get('small_image')
+
+	if image_path:
+	    get_url = img_url + image_path
+	else:
+	    get_url = False
+
         vals = {
 		'active': True,
-		'weight': record.get('weight'),
-		'standard_price': record.get('cost'),
-		'upc': record.get('upc'),
-		'list_price': record.get('price'),
+		'img_path': get_url,
+#		'standard_price': record.get('cost'),
+#		'upc': record.get('upc'),
+#		'list_price': record.get('price'),
                 'description': record.get('description', ' '),
                 'mage_status': record['status'],
-                'name': record['name'],
+#                'name': record['name'],
                 'default_code': record['sku'],
                 'mage_type': record['type_id'],
                 'set': set_obj.get_mage_record(cr, uid, record['attribute_set_id']),
@@ -150,6 +183,8 @@ class ProductProduct(osv.osv):
                 'sync_to_mage': True,
         }
 
+	if record.get('weight') and float(record.get('weight')) > 0:
+	    vals['weight'] = record.get('weight')
 
 	vals['taxes_id'] = self.apply_taxes(cr, uid, job, record)
 

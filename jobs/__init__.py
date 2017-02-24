@@ -11,3 +11,4 @@ import grouped_relation
 import users
 import update_status
 import stock
+import create_product

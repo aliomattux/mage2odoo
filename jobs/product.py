@@ -140,6 +140,10 @@ class MageIntegrator(osv.osv_memory):
 	    img_url = base_url + media_ext
 
         for record in records:
+	    #JDM asked that configurable product not import
+	    pp(record)
+	    if record['type_id'] in ['configurable', 'bundle', 'grouped']:
+		continue
 	  #  pp(record)
 	    #Solves bug with null sku
 	    if not record['sku']:

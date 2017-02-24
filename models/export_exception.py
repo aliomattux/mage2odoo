@@ -1,15 +1,15 @@
 from openerp.osv import osv, fields
 
 
-class MageImportException(osv.osv):
-    _name = 'mage.import.exception'
-    _rec_name = 'external_id'
+class MageExportException(osv.osv):
+    _name = 'mage.export.exception'
     _columns = {
+	'name': fields.char('Name'),
 	'type': fields.char('Type'),
 	'external_id': fields.char('External Id'),
 	'message': fields.text('Message'),
 	'data': fields.text('Data'),
-	'job': fields.many2one('external.job', 'Job'),
+	'job': fields.many2one('mage.job', 'Job'),
     }
 
     def retry_job_object(self, cr, uid, ids):
