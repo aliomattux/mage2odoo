@@ -1,11 +1,17 @@
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from pprint import pprint as pp
+class SaleOrderLine(osv.osv):
+    _inherit = 'sale.order.line'
+    _columns = {
+	'mage_item_id': fields.char('Mage Item Id'),
+    }
 
 class SaleOrder(osv.osv):
     _inherit = 'sale.order'
     _columns = {
 	'amazon_process': fields.boolean('Amazon Process', help="Technical field"),
+	'department': fields.char('Department'),
 	'mage_store': fields.many2one('mage.store.view', 'Magento Store'),
 	'canceled_sale_order': fields.many2one('sale.order'),
 	'canceled_order_failed': fields.boolean('Original Sale Not Canceled'),
@@ -106,7 +112,6 @@ class SaleOrder(osv.osv):
 	if record['state'] in ['canceled', 'closed']:
 	    vals['state'] = 'cancel'
 
-	vals['mage_shipment_complete'] = True
 
 	return vals
 	    
@@ -183,6 +188,11 @@ class SaleOrder(osv.osv):
                          'warehouse_id': storeview.warehouse.id,
             })
 
+	    fba_order = self.pool.get('mage.integrator').check_fba_order(cr, uid, record)
+	    if fba_order:
+		if storeview.fba_warehouse:
+		    vals.update({'warehouse_id': storeview.fba_warehouse.id})
+
 	#Payment and order totals
 	payment_vals = self.get_mage_payment_details(cr, uid, job, record, payment_defaults)
 	vals.update(payment_vals)
@@ -248,6 +258,7 @@ class SaleOrder(osv.osv):
                     'name': item['name'] or item['sku'],
                     'price_unit': float(item['price']),
 		    'product_uom': product.uom_id.id,
+		    'mage_item_id': item['item_id'],
                     'product_uom_qty': float(item['qty_ordered']),
 #                    'product_uom_qty': float(item['qty_shipped']),
                   #  'magento_notes': item['product_options'],

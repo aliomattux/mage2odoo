@@ -102,6 +102,7 @@
 	    <field name="arch" type="xml">
                 <field name="warehouse_id" position="after">
                     <field name="mage_store" />
+		    <field name="department" />
                 </field>
                 <field name="order_policy" position="after">
                     <field name="mage_order_status" />
@@ -152,7 +153,7 @@
 	    <field name="context">{}</field>
 	    <field name="view_id" ref="sale.view_quotation_tree"/>
 	    <field name="view_mode">tree,form,calendar,graph</field>
-	    <field name="domain">[('state','in',('draft','sent','cancel'))]</field>
+	    <field name="domain">[('state','in',('draft','sent'))]</field>
 	    <field name="search_view_id" ref="sale.view_sales_order_filter"/>
 	    <field name="help" type="html">
 	      <p class="oe_view_nocontent_create">
@@ -168,6 +169,19 @@
 	      </p>
 	    </field>
 	</record>
+
+	<record id="action_canceled_orders" model="ir.actions.act_window">
+	    <field name="name">Canceled Orders</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="res_model">sale.order</field>
+	    <field name="view_type">form</field>
+	    <field name="context">{}</field>
+	    <field name="view_id" ref="sale.view_quotation_tree"/>
+	    <field name="view_mode">tree,form,calendar,graph</field>
+	    <field name="domain">[('state', '=', 'cancel')]</field>
+	    <field name="search_view_id" ref="sale.view_sales_order_filter"/>
+	</record>
+
 
 	<record id="sale.action_orders" model="ir.actions.act_window">
 	    <field name="name">Sales Orders</field>
@@ -188,6 +202,10 @@
 	      </p>
 	    </field>
 	</record>
+
+        <menuitem id="menu_action_canceled_orders"
+                action="action_canceled_orders" parent="base.menu_sales"
+	sequence="6"/>
 
     </data>
 </openerp>

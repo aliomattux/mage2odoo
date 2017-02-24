@@ -2,6 +2,7 @@
     <data>
         <menuitem name="Mage2Odoo"
         id="menu_mage_core"
+	groups="group_mage2odoo_manager"
         sequence="60"/>
 
         <menuitem name="Configuration"

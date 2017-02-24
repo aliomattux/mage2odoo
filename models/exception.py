@@ -9,7 +9,7 @@ class MageImportException(osv.osv):
 	'external_id': fields.char('External Id'),
 	'message': fields.text('Message'),
 	'data': fields.text('Data'),
-	'job': fields.many2one('external.job', 'Job'),
+	'job': fields.many2one('mage.job', 'Job'),
     }
 
     def retry_job_object(self, cr, uid, ids):

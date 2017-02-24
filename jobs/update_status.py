@@ -4,6 +4,7 @@ from openerp.tools.translate import _
 from datetime import datetime, timedelta
 
 HOLDED_STATUSES = ['new', 'pending', 'holded']
+CANCELED_STATUSES = ['canceled', 'closed']
 
 class SaleOrder(osv.osv):
     _inherit = 'sale.order'
@@ -16,6 +17,25 @@ class SaleOrder(osv.osv):
 class MageIntegrator(osv.osv_memory):
 
     _inherit = 'mage.integrator'
+
+    def wrapper_update_odoo_orders(self, cr, uid, job, context=None):
+	try:
+	    self.update_odoo_orders(cr, uid, job, context=context)
+	except Exception, e:
+	    print e
+	    html = 'Alert! The Magento to Odoo Update job has failed.'
+            recipients_data = [
+                {'name': 'Kyle Waid', 'email': 'kyle.waid@gcotech.com'},
+                {'name': 'David Wilhelm', 'email': 'davidkwilhelm@gmail.com'},
+            ]
+
+            sender = 'alerts@odoo.growgreenmi.com'
+            subject = 'GGM Update Script Alert'
+            from_mail = "GGM Alerts <alerts@odoo.growgreenmi.com>"
+	    self.send_error_notification(html, recipients_data, sender, subject, from_mail)
+
+	return True
+
 
     def update_odoo_orders(self, cr, uid, job, context=None):
         """ See if order status is changed in Magento. If so then update it in Odoo
@@ -76,7 +96,7 @@ class MageIntegrator(osv.osv_memory):
                     self.mage_status_pending(cr, uid, sale)
 
 
-                elif mage_status == 'canceled' and sale.state != 'cancel':
+                elif mage_status in CANCELED_STATUSES and sale.state != 'cancel':
                     self.mage_status_canceled(cr, uid, job, sale)
 
 
@@ -88,6 +108,7 @@ class MageIntegrator(osv.osv_memory):
 
 
     def mage_status_canceled(self, cr, uid, job, sale, context=None):
+	print 'Cancelling Order', sale.name
         return self.cancel_one_order(cr, uid, job, sale, False)
 
 
@@ -103,11 +124,14 @@ class MageIntegrator(osv.osv_memory):
             self.confirm_one_order(cr, uid, sale)
 
         for picking in sale.picking_ids:
+	    if picking.state != 'done' and picking.backorder_id:
+		continue
+
             if picking.state == 'done':
                 continue
 
             if picking.state == 'cancel':
-                picking_obj.picking_reset_to_draft(cr, uid, picking)
+		picking.action_back_to_draft()
                 
             if picking.state == 'draft':
                 picking_obj.action_confirm(cr, uid, [picking.id], context=context)
@@ -116,7 +140,8 @@ class MageIntegrator(osv.osv_memory):
                 picking_obj.force_assign(cr, uid, [picking.id])
 
             picking.do_transfer()
-            picking_obj.write(cr, uid, [picking.id], {'sw_exp': False})
+	    cr.commit()
+            picking_obj.write(cr, uid, [picking.id], {'sw_exp': False, 'sw_pre_exp': False})
 
         return True
 
@@ -129,6 +154,7 @@ class MageIntegrator(osv.osv_memory):
         picking_obj = self.pool.get('stock.picking')
 
         #if the order is already confirmed then cancel all of the pickings and reset them to draft
+	print 'SALE NAME', sale.name
         if sale.state == 'done':
             #cannot hold a done order!
             return True
@@ -149,12 +175,11 @@ class MageIntegrator(osv.osv_memory):
                 if picking.state != 'cancel':
                     picking_obj.action_cancel(cr, uid, picking.id)
 
-                picking_obj.picking_reset_to_draft(cr, uid, picking)
-
                 if picking.state == 'cancel':
                     picking.action_back_to_draft()
 
                 picking.sw_exp = False
+		picking.sw_pre_exp = False
 
         return True
 
@@ -164,20 +189,49 @@ class MageIntegrator(osv.osv_memory):
         sale.mage_custom_status = mage_status
         picking_ids = picking_obj.search(cr, uid, [('sale', '=', sale.id)])
         if picking_ids:
-            picking_obj.write(cr, uid, picking_ids, {'sw_exp': False})
+            picking_obj.write(cr, uid, picking_ids, {'sw_exp': False, 'sw_pre_exp': False})
 
 
-    def mage_unhold_order(self, cr, uid, sale, mage_status):
+    def mage_unhold_order(self, cr, uid, sale, mage_status, context=None):
+	if not context:
+	    context = None
+	picking_obj = self.pool.get('stock.picking')
         if sale.state == 'draft':
             self.confirm_one_order(cr, uid, sale)
 
         for picking in sale.picking_ids:
             if picking.state == 'draft':
-                picking.action_confirm()
+		picking_obj.action_confirm(cr, uid, [picking.id], context=context)
+                #picking.action_confirm()
                 picking.sw_exp = False
+		picking.sw_pre_exp = False
 
         return;
 
 
+    def send_error_notification(self, html, recipients_data, sender, subject, from_mail, context=None):
+        from email.MIMEMultipart import MIMEMultipart
+        from email.MIMEText import MIMEText
+        from email.MIMEImage import MIMEImage
+        import smtplib
+        receivers = []
+        to_list = []
+        msg = MIMEMultipart()
+        msg['Subject'] = subject
+        msg['From'] = from_mail
 
+        for person in recipients_data:
+            to_list.append("<%s>" % (person['email']))
+            receivers.append(person['email'])
 
+        msg['To'] = ', '.join(to_list)
+        body = html
+        content = MIMEText(body, 'html')
+        msg.attach(content)
+        try:
+            smtpObj = smtplib.SMTP('localhost')
+            smtpObj.sendmail(sender, receivers, msg.as_string())
+        except Exception, e:
+            print 'THERE WAS EXCEPTION', e
+
+        return True

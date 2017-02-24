@@ -18,12 +18,14 @@
             <field name="model">delivery.carrier</field>
             <field name="inherit_id" ref="delivery.view_delivery_carrier_form" />
             <field name="arch" type="xml">
-                <field name="product_id" position="after" >
-		    <field name="display_in_ui" />
-                    <field name="mage_code" />
-		    <field name="mage_carrier" string="Deprecated"/>
-		    <field name="mage_carrier_code" />
-                </field>
+                <group name="general" position="after" >
+		    <group colspan="4">
+                        <field name="mage_code" />
+		        <field name="mage_carrier_code" />
+		        <field name="channel_name" />
+		        <field name="channel_color" />
+		    </group>
+                </group>
             </field>
         </record>
 

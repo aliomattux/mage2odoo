@@ -34,7 +34,6 @@ class StockMove(osv.osv):
 	for move in moves:
             sale_line_id, price = self.find_sale_line_reference(cr, uid, move.product_id.id, move.procurement_id.sale_line_id.order_id.id)
 	    if not sale_line_id:
-		print 'NO SALE LINE ID'
 		continue
 	    move.sale_line_id = sale_line_id
 	    move.sale_price = price

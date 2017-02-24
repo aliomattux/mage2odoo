@@ -18,4 +18,3 @@ import procurement
 import package
 import create_mage_order
 import exception
-import stock_draft

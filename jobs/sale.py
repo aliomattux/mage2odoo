@@ -9,6 +9,14 @@ class MageIntegrator(osv.osv_memory):
 
     _inherit = 'mage.integrator'
 
+    def check_fba_order(self, cr, uid, record):
+        #check if this is an FBA order
+        if record.get('shipping_description') and 'Amazon' in record.get('shipping_description') \
+		and 'Std Cont US' not in record.get('shipping_description'):
+	    return True
+
+	return False
+
 
     def import_sales_orders(self, cr, uid, job, context=None):
 	storeview_obj = self.pool.get('mage.store.view')
@@ -147,7 +155,7 @@ class MageIntegrator(osv.osv_memory):
 	    if not orders:
 	        continue
 
-	    skip_items = ['ggmnoship', 'ggmdropship', 'ggmrma']
+	    skip_items = ['ggmnotship', 'ggmnoship', 'ggmdropship', 'ggmrma']
 	    for order in orders:
 		skip_order = False
 		#GG mod, skip certain orders
@@ -156,7 +164,8 @@ class MageIntegrator(osv.osv_memory):
 			skip_order = True
 			break
 
-#		if skip_order:
+		if skip_order:
+		    continue
 #		    print 'Marketplace Order'
 #		    try:
 #		        status = self.set_one_order_status(cr, uid, job, order, 'o_complete', 'Marketplace Order')
@@ -171,7 +180,7 @@ class MageIntegrator(osv.osv_memory):
 #		    if not skip_status:
 #		        status = self.set_one_order_status(cr, uid, job, order, 'o_complete', 'Order Imported')
 
-		    print 'Skipping existing order %s' % order['increment_id']
+#		    print 'Skipping existing order %s' % order['increment_id']
 		    continue
 
 		#Assign guest checkout orders to odoo customer if applicable
@@ -180,7 +189,12 @@ class MageIntegrator(osv.osv_memory):
 
 	        try:
 	            sale_order = self.process_one_order(cr, uid, job, order, storeview, payment_defaults, defaults, integrity_product, mappinglines)
-		    if order['status'] not in ['pending', 'new']:
+		    fba_order = self.check_fba_order(cr, uid, order)
+		    if fba_order:
+			self.confirm_one_order(cr, uid, sale_order)
+			self.mage_status_complete(cr, uid, sale_order)
+
+		    if order['status'] not in ['pending', 'new', 'complete']:
 		        #All orders must go to Shipworks
 		        self.confirm_one_order(cr, uid, sale_order)
 
@@ -194,7 +208,9 @@ class MageIntegrator(osv.osv_memory):
 				if picking.state != 'assigned':
                                     picking_obj.force_assign(cr, uid, [picking.id])
                                 picking.do_transfer()
-
+			else:
+                            self.confirm_one_order(cr, uid, sale_order)
+                            self.mage_status_complete(cr, uid, sale_order)
 #		    if order['status'] in ['pending', 'new']:
  #                       picking_ids = picking_obj.search(cr, uid, [('sale', '=', sale_order.id)])
   #                      if picking_ids:
@@ -306,7 +322,7 @@ class MageIntegrator(osv.osv_memory):
                 else:
                     picking_obj.action_cancel(cr, uid, picking.id)
 
-		picking_obj.write(cr, uid, [picking.id], {'sw_exp': False})
+		picking_obj.write(cr, uid, [picking.id], {'sw_exp': False, 'sw_pre_exp': False})
 #                picking_obj.unlink(cr, uid, picking.id)
         if cant_process:
             exception_obj.create(cr, uid, {
@@ -320,7 +336,7 @@ class MageIntegrator(osv.osv_memory):
 
         sale_obj.action_cancel(cr, uid, sale.id)
 	if new_sale:
-	    sale_obj.write(cr, uid, new_sale, {'canceled_order_failed': cant_process, \
+	    sale_obj.write(cr, uid, new_sale.id, {'canceled_order_failed': cant_process, \
 		'canceled_sale_order': sale.id})
 
         return True
