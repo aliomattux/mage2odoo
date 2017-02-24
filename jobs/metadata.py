@@ -15,7 +15,7 @@ class MageIntegrator(osv.osv_memory):
             self.sync_mage_carriers(cr, uid, job)
 	#TODO: Requires investigation
 #	    self.sync_all_taxes(cr, uid, job)
-            self.sync_instance_order_statuses(cr, uid, job)
+#            self.sync_instance_order_statuses(cr, uid, job)
 
 	except Exception, e:
 	    raise osv.except_osv(_('Metadata Sync Error'), _(str(e)))

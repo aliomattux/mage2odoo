@@ -7,7 +7,6 @@
             <field name="arch" type="xml">
 		<field name="name" position="replace">
 		    <field name="name" string="Product" filter_domain="['|','|',('default_code','ilike',self),('name','ilike',self),('upc', 'ilike', self)]"/>
-<!--	David said not good enough	    <field string="UPC" name="upc" filter_domain="[('upc','ilike', self)]" /> -->
 		</field>
 	    </field>
 	</record>
@@ -68,6 +67,16 @@
 	    <field name="model">product.template</field>
 	    <field name="inherit_id" ref="product.product_template_only_form_view"/>
 	    <field name="arch" type="xml">
+		<field name="default_code" position="replace" />
+		<field name="name" position="replace" />
+		<label string="Product Name" position="replace">
+		    <label class="oe_edit_only" for="name" string="Product Identification"/>
+		    <group>
+		    <field name="default_code" attrs="{'required': [('sync_to_mage', '=', True)]}"/>
+		    <field name="name" style="width: 230%;"/>
+		    </group>
+		</label>
+
                 <xpath expr="//page[@string='Variants']" position="replace">
                     <page string="Associated Products" attrs="{'invisible': 
 			['|', ('mage_type', '!=', 'configurable'), ('sync_to_mage', '!=', True)]}" >
@@ -86,13 +95,14 @@
                     </page>
 		    <page string="Magento" attrs="{'invisible': [('sync_to_mage', '!=', True)]}">
 		        <group string="General">
-			    <field name="set" />
-			    <field name="mage_type" />
+			    <field name="set" attrs="{'required': [('sync_to_mage', '=', True)]}"/>
+			    <field name="mage_type" attrs="{'required': [('sync_to_mage', '=', True)]}"/>
 			    <field name="external_id" />
 			    <field name="mage_tax_class" />
 			    <field name="shipping_product" />
 			    <field name="img_path" />
 			    <field name="url_path" />
+			    <field name="mage_last_sync_date" />
 		        </group>
 			<group string="Status">
 			    <field name="visibility" />

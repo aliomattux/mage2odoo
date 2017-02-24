@@ -62,6 +62,14 @@
 		    <group>
 			 <field name="partner_invoice_id" groups="sale.group_delivery_invoice_address" context="{'default_type':'invoice', 'show_address': 1}" options='{"always_reload": True}'/>
 		    </group>
+		    <group name="paypal" string="PayPal">
+			<field name="paypal_transaction_id" />
+			<field name="paypal_buyer_email" />
+			<field name="paypal_address_status" />
+			<field name="paypal_payer_id" />
+			<field name="paypal_payer_status" />
+		 	<field name="paypal_token" />
+		    </group>
 		</group>
                 <page string="Billing" position="after" >
                     <page string="Shipping" >

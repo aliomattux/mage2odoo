@@ -21,7 +21,8 @@
 	     'views/stock.xml',
 	     'views/delivery.xml',
 	     'views/partner.xml',
-	     'views/exception.xml',
+	     'views/import_exception.xml',
+	     'views/export_exception.xml',
 	     'data/mage_shipping.xml',
     ],
     'test': [

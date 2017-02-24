@@ -85,7 +85,7 @@ class MageIntegrator(osv.osv_memory):
 
 	filters = {
 		'store_id': {'=':storeview.external_id},
-		'status': {'in': statuses}
+	#	'status': {'in': statuses}
 	}
 
 	if start_time:
@@ -96,9 +96,12 @@ class MageIntegrator(osv.osv_memory):
 	    filters.update({'CREATED_AT': dict})
 	#Make the external call and get the order ids
 	#Calling info is really inefficient because it loads data we dont need
+	print 'Getting Order Data'
 	order_data = self._get_job_data(cr, uid, job, 'sales_order.search', [filters])
 
 	if not order_data:
+	    print 'No Order Data'
+	    print 'filters', filters
 	    return True
 
 	#The following code needs a proper implementation,
@@ -124,6 +127,7 @@ class MageIntegrator(osv.osv_memory):
 	increment_ids = [z[0] for z in res]
 	increment_ids.sort()
 	increment_ids = order_ids
+	print increment_ids
 	datas = [increment_ids[i:i+300] for i in range(0, len(increment_ids), 300)]
 
 	for dataset in datas:
@@ -134,8 +138,10 @@ class MageIntegrator(osv.osv_memory):
 		continue
 
 	    if not orders:
+		print 'No Orders'
 	        continue
 
+	    for order in orders:
 		#TODO: Add proper logging and debugging
 	        order_obj = self.pool.get('sale.order')
 	        order_ids = order_obj.search(cr, uid, [('mage_order_number', '=', order['increment_id'])])
@@ -152,7 +158,7 @@ class MageIntegrator(osv.osv_memory):
 
 	        try:
 	            sale_order = self.process_one_order(cr, uid, job, order, storeview, payment_defaults, defaults, integrity_product, mappinglines)
-
+		    sale_order.action_button_confirm()
 		    if order.get('relation_parent_id') and order.get('increment_id')[-2:] == '-1':
 			to_cancel_ids = self.pool.get('sale.order').search(cr, uid, [('external_id', '=', order['relation_parent_id'])])
 			if to_cancel_ids:
@@ -161,8 +167,6 @@ class MageIntegrator(osv.osv_memory):
 				):
 				self.cancel_one_order(cr, uid, job, cancel_order, sale_order)
 				
-		    #Implement something to auto approve if configured
-#		    sale_order.action_button_confirm()
 
 	        except Exception, e:
 		    print 'Exception', e
@@ -177,7 +181,7 @@ class MageIntegrator(osv.osv_memory):
 		    continue
 
 		if not skip_status:
-		    status = self.set_one_order_status(cr, uid, job, order, 'o_complete', 'Order Imported')
+#		    status = self.set_one_order_status(cr, uid, job, order, 'o_complete', 'Order Imported')
 		    if not status:
 		        print 'Created order but could not notify Magento'
 
@@ -219,8 +223,6 @@ class MageIntegrator(osv.osv_memory):
 	if sale.state == 'draft':
 	    sale.action_button_confirm()
 	    
-
-
 
     def cancel_one_order(self, cr, uid, job, sale, new_sale):
 	exception_obj = self.pool.get('mage.import.exception')

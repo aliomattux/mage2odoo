@@ -50,11 +50,7 @@ class MageIntegrator(osv.osv_memory):
 
     def send_one_package(self, cr, uid, job, incrementid, package, track_only):
 	#This is yucky business
-#	base_carrier = package.picking.carrier_id.mage_carrier
-	if package.tracking_number[0:3] == '1Z':
-	    base_carrier = 'ups'
-	else:
-	    base_carrier = 'usps'
+	base_carrier = package.picking.carrier_id.mage_carrier
 
 	if track_only:
 	    try:
@@ -67,10 +63,8 @@ class MageIntegrator(osv.osv_memory):
 	else:
             try:
 		response = self._get_job_data(cr, uid, job, \
-                	'sales_order_shipment.create', [incrementid, {}, 'Order Has Shipped', True, False])
-                self._get_job_data(cr, uid, job, \
-                        'sales_order_shipment.addTrack', [response, base_carrier, \
-                        'Shipped', package.tracking_number])
+                	'sales_order_invoice.create_tracking', [incrementid, False, \
+                        False, False, package.tracking_number, base_carrier, 'Shipped'])
             except Exception, e:
 		print 'Exception', e
 		return False

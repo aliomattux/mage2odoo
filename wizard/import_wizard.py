@@ -12,6 +12,7 @@ class MageImportWizard(osv.osv_memory):
         'file_name': fields.char('File Name', size=64),
     }
 
+
     def import_products(self, cr, uid, ids, context=None):
         wizard = self.browse(cr, uid, ids[0], context=context)
         file = wizard.file
@@ -20,8 +21,21 @@ class MageImportWizard(osv.osv_memory):
         reader = csv.DictReader(input, quotechar='"', delimiter=',')
         product_obj = self.pool.get('product.product')
         error_count = 0
+	columns = [
+		'SKU',
+		'NAME',
+		'ATTRIBUTE_SET_ID',
+		'STORE_ID',
+		'TAX_CLASS_ID',
+		'DESCRIPTION',
+		'PRODUCT_TYPE',
+		'CATEGORY_IDS',
+		'WEBSITE_IDS',
+		'WEIGHT',
+		'PRICE'
+	]
         for row in reader:
-	    print row
+	    prepare_product_vals
 
 	return True
 

@@ -6,6 +6,12 @@ class SaleOrder(osv.osv):
     _inherit = 'sale.order'
     _columns = {
 	'mage_store': fields.many2one('mage.store.view', 'Magento Store'),
+        'paypal_transaction_id': fields.char('PayPal Transaction ID'),
+        'paypal_buyer_email': fields.char('PayPal Buyer Email'),
+        'paypal_address_status': fields.char('PayPal Address Status'),
+        'paypal_payer_id': fields.char('PayPal Payer ID'),
+        'paypal_payer_status': fields.char('PayPal Payer Status'),
+        'paypal_token': fields.char('PayPal Token'),
 	'canceled_sale_order': fields.many2one('sale.order'),
 	'canceled_order_failed': fields.boolean('Original Sale Not Canceled'),
 	'mage_cart_id': fields.integer('Magento Cart ID'),
@@ -104,9 +110,18 @@ class SaleOrder(osv.osv):
 	if record['state'] in ['canceled', 'closed']:
 	    vals['state'] = 'cancel'
 
-       if record['state'] == 'complete':
-           vals['mage_shipment_complete'] = True
+        if record['state'] == 'complete':
+            vals['mage_shipment_complete'] = True
 
+
+	if record.get('payment') and record['payment'].get('additional_information'):
+	    pay_rec = record['payment']['additional_information']
+	    vals['paypal_transaction_id'] = record['payment'].get('last_trans_id')
+	    vals['paypal_buyer_email'] = pay_rec.get('paypal_payer_email')
+	    vals['paypal_address_status'] = pay_rec.get('paypal_address_status')
+	    vals['paypal_payer_id'] = pay_rec.get('paypal_payer_id')
+	    vals['paypal_payer_status'] = pay_rec.get('paypal_payer_status')
+	    vals['paypal_token'] = pay_rec.get('paypal_express_checkout_token')
 	return vals
 	    
 
@@ -208,7 +223,7 @@ class SaleOrder(osv.osv):
                 )
             )
 
-        if record.get('discount_amount'):
+	if record.get('discount_amount') and (float(record.get('discount_amount')) > 0) or (float(record.get('discount_amount')) < 0):
             vals['order_line'].append(
                 self.get_discount_line_data_using_magento_data(
                 cr, uid, record
@@ -228,23 +243,24 @@ class SaleOrder(osv.osv):
 
         line_data = []
         for item in order['items']:
-
-           if item['product_type'] in ['simple', 'grouped'] or not item['product_type']:
+            tax_percent = item.get('tax_percent')
+            taxes = False
+            if item['product_type'] in ['simple', 'grouped'] or not item['product_type']:
                 product = product_obj.get_or_create_odoo_record(
                      cr, uid, job, item['product_id'], item=item)
 
-               #Should get the price if it exists only on the configurable
-               price = item['price']
-               if not price or price == '0.0000':
-                   if item.get('parent_item_id'):
-                       for parent in order['items']:
-                           if parent['item_id'] == item.get('parent_item_id'):
-                               price = parent['price']
-                               tax_percent = parent.get('tax_percent')
-                               if rates and tax_percent and float(tax_percent) > 0.001:
-                                   taxes = self.get_mage_taxes(cr, uid, rates, parent)
+                #Should get the price if it exists only on the configurable
+                price = item['price']
+                if not price or price == '0.0000':
+                    if item.get('parent_item_id'):
+                        for parent in order['items']:
+                            if parent['item_id'] == item.get('parent_item_id'):
+                                price = parent['price']
+                                tax_percent = parent.get('tax_percent')
+                                if rates and tax_percent and float(tax_percent) > 0.001:
+                                    taxes = self.get_mage_taxes(cr, uid, rates, parent)
 
-                               break
+                                break
 
 		try:
 		    product = product_obj.get_or_create_odoo_record(

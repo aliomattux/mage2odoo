@@ -56,6 +56,11 @@
 				attrs="{'invisible': [('pay_sale_if_paid', '=', False)]}"/>
 			    <field name="default_fiscal_position" />
 			</group>
+			<group string="Inventory Sync">
+			   <field name="last_inventory_sync_date" />
+			   <field name="sync_policy" />
+			   <field name="include_boms" />
+			</group>
 			<group string="Shipping">
 			    <field name="default_shipping_partner" required="1" />
 			    <field name="shipping_product" required="1" />

@@ -67,6 +67,7 @@ class MageIntegrator(osv.osv):
                                504]:  # Gateway timeout
 		raise osv.except_osv(_('Connection Error'), _('Server Returned Error Code: %s')%err.errcode)
             else:
+		print 'ERROR CODE', err.errcode
 		raise osv.except_osv(_('Generic Connection Error'), _("Could Not Authenticate/Connect with Magento!\n" \
 			"Please verify that\n1. The Magento module is installed in the LOCAL folder on Magento.\n" \
 			"2. Your webservice user in Magento is setup with FULL Admin access.\n" \

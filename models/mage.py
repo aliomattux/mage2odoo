@@ -6,6 +6,9 @@ from pprint import pprint as pp
 class MageSetup(osv.osv):
     _name = 'mage.setup'
     _columns = {
+	'last_inventory_sync_date': fields.datetime('Last Inventory Sync Time'),
+	'sync_policy': fields.selection([('all', 'Sync All'), ('changed', 'Sync What Changed')], 'Sync Policy'),
+	'include_boms': fields.boolean('Include BOM in inventory sync', help="This will calculate build quantity"),
 	'name': fields.char('Name', required=True),
 	'debug_mode': fields.selection([('none', 'None'), ('error', 'Error'), ('debug', 'All')],
 	string='Debug Mode', help="None: This will not log any messages to Sentry.\n" \
